@@ -1,0 +1,925 @@
+openapi: 3.0.3
+info:
+  title: FaceCheck API
+  version: 1.0.0
+  description: |
+    Spring Boot 单体后端对 Flutter App 暴露的首版接口契约。
+    PostgreSQL 是唯一业务事实源；华为云 FRS 仅作为托管识别能力；
+    华为云 OBS 仅作为图片对象存储。
+servers:
+  - url: https://api.example.com
+    description: Production placeholder
+  - url: http://localhost:8080
+    description: Local development
+tags:
+  - name: Auth
+  - name: Me
+  - name: AdminSessions
+  - name: PublicCheckin
+  - name: AdminReview
+  - name: AdminSystem
+paths:
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login as ordinary user or admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login succeeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout current user and blacklist JWT
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Logged out
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/me/profile:
+    get:
+      tags: [Me]
+      summary: Get current user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Profile returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags: [Me]
+      summary: Update current user profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfileRequest'
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/me/face-photos:
+    get:
+      tags: [Me]
+      summary: List current user's face photos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Face photos returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FacePhotoSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags: [Me]
+      summary: Upload a face photo for current user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '202':
+          description: Accepted for async registration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FacePhotoSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/me/face-photos/{photoId}:
+    delete:
+      tags: [Me]
+      summary: Disable and delete a face photo owned by current user
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PhotoId'
+      responses:
+        '204':
+          description: Photo deletion accepted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/me/attendance-records:
+    get:
+      tags: [Me]
+      summary: List current user's attendance records
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: to
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Attendance history returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AttendanceRecordSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/admin/sessions:
+    get:
+      tags: [AdminSessions]
+      summary: List attendance sessions
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Session list returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AttendanceSessionSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [AdminSessions]
+      summary: Create an attendance session
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAttendanceSessionRequest'
+      responses:
+        '201':
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendanceSessionSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/admin/sessions/{sessionId}:
+    put:
+      tags: [AdminSessions]
+      summary: Update an attendance session
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAttendanceSessionRequest'
+      responses:
+        '200':
+          description: Session updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendanceSessionSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/admin/sessions/{sessionId}/publish:
+    post:
+      tags: [AdminSessions]
+      summary: Publish a session
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Session published
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendanceSessionSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/admin/sessions/{sessionId}/close:
+    post:
+      tags: [AdminSessions]
+      summary: Close a session
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Session closed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendanceSessionSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/admin/sessions/{sessionId}/cancel:
+    post:
+      tags: [AdminSessions]
+      summary: Cancel a session
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Session canceled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttendanceSessionSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/admin/sessions/{sessionId}/qr-token/reset:
+    post:
+      tags: [AdminSessions]
+      summary: Regenerate current session QR token
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: QR token reset
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QrTokenResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/admin/sessions/{sessionId}/records:
+    get:
+      tags: [AdminSessions]
+      summary: List attendance records under a session
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Session attendance records returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AttendanceRecordSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/admin/checkin-attempts:
+    get:
+      tags: [AdminReview]
+      summary: List abnormal or filtered check-in attempts
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            $ref: '#/components/schemas/CheckinStatus'
+        - in: query
+          name: resultCode
+          schema:
+            type: string
+        - in: query
+          name: sessionId
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Attempt list returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CheckinAttemptResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/admin/checkin-attempts/{attemptId}/retry:
+    post:
+      tags: [AdminReview]
+      summary: Retry a failed or manual-review attempt
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/AttemptId'
+      responses:
+        '202':
+          description: Retry accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckinAttemptResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/public/checkin/session-entry:
+    post:
+      tags: [PublicCheckin]
+      summary: Resolve QR token into check-in session info
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionEntryRequest'
+      responses:
+        '200':
+          description: Session entry info returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionEntryResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/public/checkin/attempts:
+    post:
+      tags: [PublicCheckin]
+      summary: Submit an unauthenticated check-in photo
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [qrToken, idempotencyKey, file]
+              properties:
+                qrToken:
+                  type: string
+                idempotencyKey:
+                  type: string
+                deviceId:
+                  type: string
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Final result returned synchronously
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckinAttemptResponse'
+        '202':
+          description: Accepted and still processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckinAttemptResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
+
+  /api/public/checkin/attempts/{attemptId}:
+    get:
+      tags: [PublicCheckin]
+      summary: Query final result of a check-in attempt
+      parameters:
+        - $ref: '#/components/parameters/AttemptId'
+      responses:
+        '200':
+          description: Attempt status returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckinAttemptResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/admin/system/state:
+    get:
+      tags: [AdminSystem]
+      summary: Get system health summary
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: System health returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemStateResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/admin/system/config:
+    get:
+      tags: [AdminSystem]
+      summary: List editable system configuration
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Config items returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SystemConfigItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/admin/system/config/{configKey}:
+    put:
+      tags: [AdminSystem]
+      summary: Update a system configuration item
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: configKey
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSystemConfigRequest'
+      responses:
+        '200':
+          description: Config item updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemConfigItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    SessionId:
+      in: path
+      name: sessionId
+      required: true
+      schema:
+        type: string
+        format: uuid
+    PhotoId:
+      in: path
+      name: photoId
+      required: true
+      schema:
+        type: string
+        format: uuid
+    AttemptId:
+      in: path
+      name: attemptId
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: Authentication required or token invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Access denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    TooManyRequests:
+      description: Rate limited
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          format: password
+    LoginResponse:
+      type: object
+      required: [accessToken, tokenType, expiresIn, role, user]
+      properties:
+        accessToken:
+          type: string
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: integer
+        role:
+          type: string
+          enum: [USER, ADMIN]
+        user:
+          $ref: '#/components/schemas/UserProfile'
+    UserProfile:
+      type: object
+      required: [userId, username, role, displayName]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        username:
+          type: string
+        role:
+          type: string
+          enum: [USER, ADMIN]
+        personId:
+          type: string
+          format: uuid
+          nullable: true
+        displayName:
+          type: string
+        realName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+    UpdateProfileRequest:
+      type: object
+      properties:
+        displayName:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+    FacePhotoSummary:
+      type: object
+      required: [photoId, personId, detectStatus, registerStatus, enabled, createdAt]
+      properties:
+        photoId:
+          type: string
+          format: uuid
+        personId:
+          type: string
+          format: uuid
+        detectStatus:
+          type: string
+          enum: [PENDING, PASSED, FAILED]
+        registerStatus:
+          type: string
+          enum: [PENDING, ACTIVE, FAILED, DISABLED, DELETE_PENDING, DELETE_FAILED, DELETED]
+        failureCode:
+          type: string
+          nullable: true
+        failureReason:
+          type: string
+          nullable: true
+        enabled:
+          type: boolean
+        previewUrl:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    CreateAttendanceSessionRequest:
+      type: object
+      required: [name, startTime, endTime]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        lateAfterTime:
+          type: string
+          format: date-time
+          nullable: true
+    UpdateAttendanceSessionRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateAttendanceSessionRequest'
+    AttendanceSessionSummary:
+      type: object
+      required: [sessionId, name, startTime, endTime, status, createdAt]
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        lateAfterTime:
+          type: string
+          format: date-time
+          nullable: true
+        status:
+          type: string
+          enum: [DRAFT, PUBLISHED, CLOSED, CANCELED]
+        qrTokenVersion:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+    QrTokenResponse:
+      type: object
+      required: [sessionId, qrToken, qrContent]
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        qrToken:
+          type: string
+        qrContent:
+          type: string
+          description: App deep link or encoded payload content
+    SessionEntryRequest:
+      type: object
+      required: [qrToken]
+      properties:
+        qrToken:
+          type: string
+    SessionEntryResponse:
+      type: object
+      required: [sessionId, name, startTime, endTime, status, canCheckin]
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        startTime:
+          type: string
+          format: date-time
+        endTime:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [DRAFT, PUBLISHED, CLOSED, CANCELED]
+        canCheckin:
+          type: boolean
+        refusalCode:
+          type: string
+          nullable: true
+        refusalReason:
+          type: string
+          nullable: true
+    CheckinStatus:
+      type: string
+      enum: [PROCESSING, SUCCESS, FAILED, DUPLICATE_CHECKIN, MANUAL_REVIEW]
+    CheckinAttemptResponse:
+      type: object
+      required: [attemptId, status, resultCode, sessionName]
+      properties:
+        attemptId:
+          type: string
+          format: uuid
+        sessionId:
+          type: string
+          format: uuid
+        sessionName:
+          type: string
+        status:
+          $ref: '#/components/schemas/CheckinStatus'
+        resultCode:
+          type: string
+        resultMessage:
+          type: string
+        checkinTime:
+          type: string
+          format: date-time
+          nullable: true
+        maskedPersonName:
+          type: string
+          nullable: true
+        similarity:
+          type: number
+          format: double
+          nullable: true
+        nextPollAfterSeconds:
+          type: integer
+          nullable: true
+    AttendanceRecordSummary:
+      type: object
+      required: [recordId, sessionId, sessionName, personId, checkinTime, status]
+      properties:
+        recordId:
+          type: string
+          format: uuid
+        sessionId:
+          type: string
+          format: uuid
+        sessionName:
+          type: string
+        personId:
+          type: string
+          format: uuid
+        personDisplayName:
+          type: string
+        checkinTime:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [VALID, MANUAL_CONFIRMED]
+        similarity:
+          type: number
+          format: double
+          nullable: true
+    SystemStateResponse:
+      type: object
+      properties:
+        database:
+          type: string
+          enum: [UP, DOWN, DEGRADED]
+        redis:
+          type: string
+          enum: [UP, DOWN, DEGRADED]
+        rabbitmq:
+          type: string
+          enum: [UP, DOWN, DEGRADED]
+        frs:
+          type: string
+          enum: [UP, DOWN, DEGRADED]
+        obs:
+          type: string
+          enum: [UP, DOWN, DEGRADED]
+        checkedAt:
+          type: string
+          format: date-time
+    SystemConfigItem:
+      type: object
+      required: [configKey, configValue, valueType]
+      properties:
+        configKey:
+          type: string
+        configValue:
+          type: string
+        valueType:
+          type: string
+          enum: [STRING, NUMBER, BOOLEAN, JSON]
+        description:
+          type: string
+          nullable: true
+        updatedAt:
+          type: string
+          format: date-time
+    UpdateSystemConfigRequest:
+      type: object
+      required: [configValue]
+      properties:
+        configValue:
+          type: string
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        traceId:
+          type: string
+          nullable: true
