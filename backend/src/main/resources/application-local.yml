@@ -13,3 +13,14 @@ spring:
 logging:
   level:
     com.facecheck: INFO
+
+facecheck:
+  messaging:
+    face-photo:
+      register-queue: face.photo.register
+      register-retry-queue: face.photo.register.retry
+      register-dlq-queue: face.photo.register.dlq
+      delete-queue: face.photo.delete.compensate
+      delete-retry-queue: face.photo.delete.compensate.retry
+      delete-dlq-queue: face.photo.delete.compensate.dlq
+      retry-ttl-ms: 30000

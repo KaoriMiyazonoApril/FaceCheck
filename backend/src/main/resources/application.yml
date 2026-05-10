@@ -61,3 +61,12 @@ facecheck:
     obs-bucket: ${OBS_BUCKET:}
     face-set-name: ${FRS_FACE_SET_NAME:facecheck-default}
     similarity-threshold: ${FRS_SIMILARITY_THRESHOLD:85}
+  messaging:
+    face-photo:
+      register-queue: ${FACE_PHOTO_REGISTER_QUEUE:face.photo.register}
+      register-retry-queue: ${FACE_PHOTO_REGISTER_RETRY_QUEUE:face.photo.register.retry}
+      register-dlq-queue: ${FACE_PHOTO_REGISTER_DLQ_QUEUE:face.photo.register.dlq}
+      delete-queue: ${FACE_PHOTO_DELETE_QUEUE:face.photo.delete.compensate}
+      delete-retry-queue: ${FACE_PHOTO_DELETE_RETRY_QUEUE:face.photo.delete.compensate.retry}
+      delete-dlq-queue: ${FACE_PHOTO_DELETE_DLQ_QUEUE:face.photo.delete.compensate.dlq}
+      retry-ttl-ms: ${FACE_PHOTO_RETRY_TTL_MS:30000}

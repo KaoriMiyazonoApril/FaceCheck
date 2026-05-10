@@ -14,6 +14,7 @@ servers:
 tags:
   - name: Auth
   - name: Me
+  - name: AdminUsers
   - name: AdminSessions
   - name: PublicCheckin
   - name: AdminReview
@@ -35,7 +36,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/LoginResponse'
+                $ref: '#/components/schemas/ApiResponseLogin'
         '401':
           $ref: '#/components/responses/Unauthorized'
 
@@ -63,7 +64,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserProfile'
+                $ref: '#/components/schemas/ApiResponseUserProfile'
         '401':
           $ref: '#/components/responses/Unauthorized'
     put:
@@ -83,7 +84,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UserProfile'
+                $ref: '#/components/schemas/ApiResponseUserProfile'
         '401':
           $ref: '#/components/responses/Unauthorized'
 
@@ -176,6 +177,88 @@ paths:
                   $ref: '#/components/schemas/AttendanceRecordSummary'
         '401':
           $ref: '#/components/responses/Unauthorized'
+
+  /api/admin/users:
+    post:
+      tags: [AdminUsers]
+      summary: Create a managed user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCreateUserRequest'
+      responses:
+        '200':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/admin/users/{userId}:
+    put:
+      tags: [AdminUsers]
+      summary: Update a managed user
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUpdateUserRequest'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUserProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/admin/users/{userId}/disable:
+    post:
+      tags: [AdminUsers]
+      summary: Disable a managed user
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: User disabled
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUserProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   /api/admin/sessions:
     get:
@@ -566,6 +649,13 @@ components:
       scheme: bearer
       bearerFormat: JWT
   parameters:
+    UserId:
+      in: path
+      name: userId
+      required: true
+      schema:
+        type: string
+        format: uuid
     SessionId:
       in: path
       name: sessionId
@@ -602,6 +692,12 @@ components:
             $ref: '#/components/schemas/ErrorResponse'
     Forbidden:
       description: Access denied
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Request conflicts with current state
       content:
         application/json:
           schema:
@@ -644,9 +740,43 @@ components:
           enum: [USER, ADMIN]
         user:
           $ref: '#/components/schemas/UserProfile'
+    ApiResponseLogin:
+      type: object
+      required: [success, data, timestamp]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        data:
+          $ref: '#/components/schemas/LoginResponse'
+        error:
+          nullable: true
+        traceId:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+    ApiResponseUserProfile:
+      type: object
+      required: [success, data, timestamp]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        data:
+          $ref: '#/components/schemas/UserProfile'
+        error:
+          nullable: true
+        traceId:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
     UserProfile:
       type: object
-      required: [userId, username, role, displayName]
+      required: [userId, username, role, status]
       properties:
         userId:
           type: string
@@ -656,27 +786,55 @@ components:
         role:
           type: string
           enum: [USER, ADMIN]
-        personId:
+        status:
           type: string
-          format: uuid
-          nullable: true
-        displayName:
-          type: string
-        realName:
-          type: string
-        phone:
-          type: string
-        email:
-          type: string
+          enum: [ACTIVE, LOCKED, DISABLED]
     UpdateProfileRequest:
       type: object
       properties:
-        displayName:
+        username:
           type: string
-        phone:
+          minLength: 3
+          maxLength: 64
+        password:
           type: string
-        email:
+          format: password
+          minLength: 8
+          maxLength: 72
+    AdminCreateUserRequest:
+      type: object
+      required: [username, password, role]
+      properties:
+        username:
           type: string
+          minLength: 3
+          maxLength: 64
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 72
+        role:
+          type: string
+          enum: [USER, ADMIN]
+    AdminUpdateUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 64
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 72
+        role:
+          type: string
+          enum: [USER, ADMIN]
+        status:
+          type: string
+          enum: [ACTIVE, LOCKED, DISABLED]
     FacePhotoSummary:
       type: object
       required: [photoId, personId, detectStatus, registerStatus, enabled, createdAt]
@@ -914,12 +1072,26 @@ components:
           type: string
     ErrorResponse:
       type: object
+      required: [success, error, timestamp]
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        data:
+          nullable: true
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+        traceId:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+    ErrorDetail:
+      type: object
       required: [code, message]
       properties:
         code:
           type: string
         message:
           type: string
-        traceId:
-          type: string
-          nullable: true

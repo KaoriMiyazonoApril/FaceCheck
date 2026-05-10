@@ -1,5 +1,6 @@
 package com.facecheck.infrastructure.security;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -11,6 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class BootstrapSecurityConfig {
 
     @Bean
+    @ConditionalOnMissingBean(SecurityFilterChain.class)
     SecurityFilterChain bootstrapSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)

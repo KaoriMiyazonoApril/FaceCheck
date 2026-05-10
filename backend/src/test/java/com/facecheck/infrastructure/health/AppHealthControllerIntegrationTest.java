@@ -4,32 +4,23 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.mockito.BDDMockito.given;
 
 import com.facecheck.infrastructure.logging.RequestTraceFilter;
-import com.facecheck.infrastructure.security.BootstrapSecurityConfig;
 import java.util.List;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-@WebMvcTest(AppHealthController.class)
-@Import({RequestTraceFilter.class, BootstrapSecurityConfig.class})
 class AppHealthControllerIntegrationTest {
 
-    @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
-    private DependencyHealthService dependencyHealthService;
 
     @BeforeEach
     void setUp() {
-        given(dependencyHealthService.currentStatus()).willReturn(
+        DependencyHealthService dependencyHealthService = new StubDependencyHealthService(
                 new DependencyHealthService.HealthSnapshot(
                         "UP",
                         List.of(
@@ -39,6 +30,10 @@ class AppHealthControllerIntegrationTest {
                         )
                 )
         );
+
+        mockMvc = MockMvcBuilders.standaloneSetup(new AppHealthController(dependencyHealthService))
+                .addFilters(new RequestTraceFilter())
+                .build();
     }
 
     @Test
@@ -58,5 +53,49 @@ class AppHealthControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(header().string(RequestTraceFilter.TRACE_ID_HEADER, "trace-123"))
                 .andExpect(jsonPath("$.traceId").value("trace-123"));
+    }
+
+    private static final class StubDependencyHealthService extends DependencyHealthService {
+
+        private final HealthSnapshot snapshot;
+
+        private StubDependencyHealthService(HealthSnapshot snapshot) {
+            super(emptyProvider(), emptyProvider(), emptyProvider());
+            this.snapshot = snapshot;
+        }
+
+        @Override
+        public HealthSnapshot currentStatus() {
+            return snapshot;
+        }
+
+        private static <T> ObjectProvider<T> emptyProvider() {
+            return new ObjectProvider<>() {
+                @Override
+                public T getObject(Object... args) {
+                    return null;
+                }
+
+                @Override
+                public T getIfAvailable() {
+                    return null;
+                }
+
+                @Override
+                public T getIfUnique() {
+                    return null;
+                }
+
+                @Override
+                public T getObject() {
+                    return null;
+                }
+
+                @Override
+                public Stream<T> stream() {
+                    return Stream.empty();
+                }
+            };
+        }
     }
 }
