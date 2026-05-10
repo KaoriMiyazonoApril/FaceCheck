@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,6 +31,7 @@ public class GlobalExceptionHandler {
             ConstraintViolationException.class,
             MethodArgumentTypeMismatchException.class,
             MissingServletRequestParameterException.class,
+            MissingServletRequestPartException.class,
             HttpMessageNotReadableException.class
     })
     public ResponseEntity<ApiResponse<Void>> handleValidationExceptions(Exception exception) {

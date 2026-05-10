@@ -70,3 +70,10 @@ facecheck:
       delete-retry-queue: ${FACE_PHOTO_DELETE_RETRY_QUEUE:face.photo.delete.compensate.retry}
       delete-dlq-queue: ${FACE_PHOTO_DELETE_DLQ_QUEUE:face.photo.delete.compensate.dlq}
       retry-ttl-ms: ${FACE_PHOTO_RETRY_TTL_MS:30000}
+  checkin:
+    rate-limit-window-seconds: ${CHECKIN_RATE_LIMIT_WINDOW_SECONDS:60}
+    rate-limit-max-requests: ${CHECKIN_RATE_LIMIT_MAX_REQUESTS:5}
+    idempotency-ttl-hours: ${CHECKIN_IDEMPOTENCY_TTL_HOURS:24}
+    search-max-candidates: ${CHECKIN_SEARCH_MAX_CANDIDATES:3}
+    next-poll-after-seconds: ${CHECKIN_NEXT_POLL_AFTER_SECONDS:3}
+    async-enabled: ${CHECKIN_ASYNC_ENABLED:false}

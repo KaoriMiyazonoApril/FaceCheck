@@ -1,6 +1,8 @@
 package com.facecheck.face.messaging;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import com.facecheck.auth.service.PasswordService;
 import com.facecheck.face.FaceRecognitionProvider;
 import com.facecheck.face.model.FaceDetectStatus;
@@ -18,15 +20,12 @@ import com.facecheck.storage.HuaweiObsStorageService;
 import com.facecheck.storage.ObjectKeyStrategy;
 import com.facecheck.support.RedisRabbitContainerSupport;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
 import java.util.UUID;
 import javax.imageio.ImageIO;
-import org.springframework.amqp.core.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -34,6 +33,7 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -66,7 +66,7 @@ class FacePhotoRegisterConsumerTest extends RedisRabbitContainerSupport {
     @Autowired
     private ObjectKeyStrategy objectKeyStrategy;
 
-    @Autowired
+    @SpyBean
     private RabbitTemplate rabbitTemplate;
 
     @Autowired
@@ -158,9 +158,15 @@ class FacePhotoRegisterConsumerTest extends RedisRabbitContainerSupport {
         FacePhoto reloadedPhoto = facePhotoRepository.findById(photo.getId()).orElseThrow();
         assertThat(reloadedPhoto.getRegisterStatus()).isEqualTo(FaceRegisterStatus.PENDING);
         assertThat(reloadedPhoto.getFailureCode()).isEqualTo("FRS_TIMEOUT");
-
-        FacePhotoRegisterTask message = readTask(registerRetryQueue);
-        assertThat(message.retryCount()).isEqualTo(1);
+        verify(rabbitTemplate).convertAndSend(
+                registerRetryQueue,
+                new FacePhotoRegisterTask(photo.getId(), photo.getUserId(), 1)
+        );
+        verify(rabbitTemplate, never()).convertAndSend(registerDlqQueue, new FacePhotoRegisterTask(
+                photo.getId(),
+                photo.getUserId(),
+                FacePhotoRegisterConsumer.MAX_RETRIES
+        ));
     }
 
     @Test
@@ -173,9 +179,15 @@ class FacePhotoRegisterConsumerTest extends RedisRabbitContainerSupport {
         FacePhoto reloadedPhoto = facePhotoRepository.findById(photo.getId()).orElseThrow();
         assertThat(reloadedPhoto.getRegisterStatus()).isEqualTo(FaceRegisterStatus.FAILED);
         assertThat(reloadedPhoto.getFailureCode()).isEqualTo("FRS_TIMEOUT");
-
-        FacePhotoRegisterTask message = readTask(registerDlqQueue);
-        assertThat(message.retryCount()).isEqualTo(FacePhotoRegisterConsumer.MAX_RETRIES);
+        verify(rabbitTemplate).convertAndSend(
+                registerDlqQueue,
+                new FacePhotoRegisterTask(photo.getId(), photo.getUserId(), FacePhotoRegisterConsumer.MAX_RETRIES)
+        );
+        verify(rabbitTemplate, never()).convertAndSend(registerRetryQueue, new FacePhotoRegisterTask(
+                photo.getId(),
+                photo.getUserId(),
+                FacePhotoRegisterConsumer.MAX_RETRIES + 1
+        ));
     }
 
     private FacePhoto createPendingPhoto(String username) throws Exception {
@@ -211,14 +223,6 @@ class FacePhotoRegisterConsumerTest extends RedisRabbitContainerSupport {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         ImageIO.write(image, "png", outputStream);
         return outputStream.toByteArray();
-    }
-
-    private FacePhotoRegisterTask readTask(String queue) throws Exception {
-        Message message = rabbitTemplate.receive(queue, 1000);
-        assertThat(message).isNotNull();
-        try (ObjectInputStream inputStream = new ObjectInputStream(new ByteArrayInputStream(message.getBody()))) {
-            return (FacePhotoRegisterTask) inputStream.readObject();
-        }
     }
 
     @TestConfiguration

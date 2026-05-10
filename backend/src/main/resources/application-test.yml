@@ -15,3 +15,12 @@ spring:
 logging:
   level:
     com.facecheck: DEBUG
+
+facecheck:
+  checkin:
+    rate-limit-window-seconds: 60
+    rate-limit-max-requests: 5
+    idempotency-ttl-hours: 24
+    search-max-candidates: 3
+    next-poll-after-seconds: 3
+    async-enabled: false

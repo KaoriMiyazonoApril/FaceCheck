@@ -643,15 +643,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CheckinAttemptResponse'
+                $ref: '#/components/schemas/ApiResponseCheckinAttemptResponse'
         '202':
           description: Accepted and still processing
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CheckinAttemptResponse'
+                $ref: '#/components/schemas/ApiResponseCheckinAttemptResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
         '429':
           $ref: '#/components/responses/TooManyRequests'
 
@@ -667,7 +669,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CheckinAttemptResponse'
+                $ref: '#/components/schemas/ApiResponseCheckinAttemptResponse'
         '404':
           $ref: '#/components/responses/NotFound'
 
@@ -976,6 +978,23 @@ components:
         timestamp:
           type: string
           format: date-time
+    ApiResponseCheckinAttemptResponse:
+      type: object
+      required: [success, data, timestamp]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        data:
+          $ref: '#/components/schemas/CheckinAttemptResponse'
+        error:
+          nullable: true
+        traceId:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
     UserProfile:
       type: object
       required: [userId, username, role, status]
@@ -1171,7 +1190,7 @@ components:
           nullable: true
     CheckinStatus:
       type: string
-      enum: [PROCESSING, SUCCESS, FAILED, DUPLICATE_CHECKIN, MANUAL_REVIEW]
+      enum: [PROCESSING, SUCCESS, FAILED, DUPLICATE_CHECKIN]
     CheckinAttemptResponse:
       type: object
       required: [attemptId, status, resultCode, sessionName]
@@ -1194,7 +1213,7 @@ components:
           type: string
           format: date-time
           nullable: true
-        maskedPersonName:
+        maskedUsername:
           type: string
           nullable: true
         similarity:
@@ -1206,7 +1225,7 @@ components:
           nullable: true
     AttendanceRecordSummary:
       type: object
-      required: [recordId, sessionId, sessionName, personId, checkinTime, status]
+      required: [recordId, sessionId, sessionName, userId, checkinTime, status]
       properties:
         recordId:
           type: string
@@ -1216,10 +1235,10 @@ components:
           format: uuid
         sessionName:
           type: string
-        personId:
+        userId:
           type: string
           format: uuid
-        personDisplayName:
+        maskedUsername:
           type: string
         checkinTime:
           type: string

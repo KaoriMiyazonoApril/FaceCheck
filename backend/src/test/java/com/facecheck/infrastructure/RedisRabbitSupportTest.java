@@ -46,7 +46,7 @@ class RedisRabbitSupportTest extends RedisRabbitContainerSupport {
     @Test
     void shouldExposeRedisNamespacesAndRabbitTopology() {
         String blacklistKey = redisKeyFactory.authBlacklist("jti-1");
-        String idempotencyKey = redisKeyFactory.checkinIdempotency("idem-1");
+        String idempotencyKey = redisKeyFactory.checkinIdempotency("qr-1", "idem-1");
         String qrKey = redisKeyFactory.sessionQr("qr-1");
 
         redisTemplate.opsForValue().set(blacklistKey, "1");

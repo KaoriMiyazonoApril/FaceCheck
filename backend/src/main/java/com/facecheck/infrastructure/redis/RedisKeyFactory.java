@@ -2,6 +2,8 @@ package com.facecheck.infrastructure.redis;
 
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 public class RedisKeyFactory {
 
@@ -9,8 +11,12 @@ public class RedisKeyFactory {
         return "auth:blacklist:" + jti;
     }
 
-    public String checkinIdempotency(String idempotencyKey) {
-        return "checkin:idempotency:" + idempotencyKey;
+    public String checkinIdempotency(String scope, String idempotencyKey) {
+        return "checkin:idempotency:" + scope + ":" + idempotencyKey;
+    }
+
+    public String checkinRate(UUID sessionId, String subject) {
+        return "checkin:rate:" + sessionId + ":" + subject;
     }
 
     public String sessionQr(String qrToken) {
