@@ -1,0 +1,13 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  jpa:
+    show-sql: false
+  docker:
+    compose:
+      enabled: false
+
+logging:
+  level:
+    com.facecheck: DEBUG

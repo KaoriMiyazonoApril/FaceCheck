@@ -1,0 +1,43 @@
+@ECHO OFF
+SETLOCAL ENABLEDELAYEDEXPANSION
+
+SET "BASE_DIR=%~dp0"
+SET "WRAPPER_PROPERTIES=%BASE_DIR%.mvn\wrapper\maven-wrapper.properties"
+
+IF NOT EXIST "%WRAPPER_PROPERTIES%" (
+  ECHO Missing %WRAPPER_PROPERTIES% 1>&2
+  EXIT /B 1
+)
+
+FOR /F "usebackq tokens=1,* delims==" %%A IN ("%WRAPPER_PROPERTIES%") DO (
+  IF "%%A"=="distributionUrl" SET "DISTRIBUTION_URL=%%B"
+)
+
+IF "%DISTRIBUTION_URL%"=="" (
+  ECHO distributionUrl is not configured in %WRAPPER_PROPERTIES% 1>&2
+  EXIT /B 1
+)
+
+IF "%MAVEN_USER_HOME%"=="" SET "MAVEN_USER_HOME=%USERPROFILE%\.m2"
+
+FOR %%F IN ("%DISTRIBUTION_URL%") DO SET "ARCHIVE_NAME=%%~nxF"
+SET "MAVEN_DIR_NAME=%ARCHIVE_NAME:-bin.tar.gz=%"
+SET "MAVEN_DIR_NAME=%MAVEN_DIR_NAME:-bin.zip=%"
+SET "DISTRIBUTION_DIR=%MAVEN_USER_HOME%\wrapper\dists\%MAVEN_DIR_NAME%"
+SET "MAVEN_HOME=%DISTRIBUTION_DIR%\%MAVEN_DIR_NAME%"
+SET "MVN_BIN=%MAVEN_HOME%\bin\mvn.cmd"
+
+IF NOT EXIST "%MVN_BIN%" (
+  IF NOT EXIST "%DISTRIBUTION_DIR%" MKDIR "%DISTRIBUTION_DIR%"
+  SET "ARCHIVE_PATH=%DISTRIBUTION_DIR%\%ARCHIVE_NAME%"
+
+  IF NOT EXIST "%ARCHIVE_PATH%" (
+    powershell.exe -NoProfile -NonInteractive -Command "$ProgressPreference='SilentlyContinue'; Invoke-WebRequest -UseBasicParsing '%DISTRIBUTION_URL%' -OutFile '%ARCHIVE_PATH%'" || EXIT /B 1
+  )
+
+  IF EXIST "%MAVEN_HOME%" RMDIR /S /Q "%MAVEN_HOME%"
+  tar -xzf "%ARCHIVE_PATH%" -C "%DISTRIBUTION_DIR%" || EXIT /B 1
+)
+
+CALL "%MVN_BIN%" %*
+EXIT /B %ERRORLEVEL%

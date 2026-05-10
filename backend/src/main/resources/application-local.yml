@@ -1,0 +1,15 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    hikari:
+      maximum-pool-size: 5
+  rabbitmq:
+    listener:
+      simple:
+        auto-startup: false
+
+logging:
+  level:
+    com.facecheck: INFO

@@ -1,0 +1,8 @@
+.git/
+.dockerignore
+backend/target/
+app/.dart_tool/
+app/build/
+*.log
+.env
+.env.*

@@ -1,0 +1,73 @@
+#!/bin/sh
+set -eu
+
+BASE_DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+WRAPPER_PROPERTIES="$BASE_DIR/.mvn/wrapper/maven-wrapper.properties"
+
+die() {
+  echo "$1" >&2
+  exit 1
+}
+
+[ -f "$WRAPPER_PROPERTIES" ] || die "Missing $WRAPPER_PROPERTIES"
+
+distribution_url=$(grep '^distributionUrl=' "$WRAPPER_PROPERTIES" | cut -d= -f2-)
+[ -n "$distribution_url" ] || die "distributionUrl is not configured in $WRAPPER_PROPERTIES"
+
+MAVEN_USER_HOME=${MAVEN_USER_HOME:-"$BASE_DIR/.mvn-home"}
+archive_name=${distribution_url##*/}
+maven_dir_name=$archive_name
+maven_dir_name=${maven_dir_name%-bin.tar.gz}
+maven_dir_name=${maven_dir_name%-bin.zip}
+distribution_dir="$MAVEN_USER_HOME/wrapper/dists/$maven_dir_name"
+maven_home="$distribution_dir/$maven_dir_name"
+mvn_bin="$maven_home/bin/mvn"
+
+download() {
+  url=$1
+  output=$2
+
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$url" -o "$output"
+    return
+  fi
+
+  if command -v wget >/dev/null 2>&1; then
+    wget -q -O "$output" "$url"
+    return
+  fi
+
+  die "curl or wget is required to download Maven."
+}
+
+extract() {
+  archive=$1
+  destination=$2
+
+  case "$archive" in
+    *.tar.gz)
+      tar -xzf "$archive" -C "$destination"
+      ;;
+    *.zip)
+      die "ZIP archives are not supported by this POSIX wrapper in the current environment."
+      ;;
+    *)
+      die "Unsupported Maven archive format: $archive"
+      ;;
+  esac
+}
+
+if [ ! -x "$mvn_bin" ]; then
+  mkdir -p "$distribution_dir"
+  archive_path="$distribution_dir/$archive_name"
+
+  if [ ! -f "$archive_path" ]; then
+    [ "${MVNW_VERBOSE:-false}" != "true" ] || echo "Downloading Maven from $distribution_url"
+    download "$distribution_url" "$archive_path"
+  fi
+
+  rm -rf "$maven_home"
+  extract "$archive_path" "$distribution_dir"
+fi
+
+exec "$mvn_bin" "$@"

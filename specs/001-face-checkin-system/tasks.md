@@ -28,15 +28,15 @@ description: "Task list for 管理员场次人脸签到系统 implementation"
 
 **Purpose**: 建立后端与 Flutter 基础骨架、基础设施编排、统一响应和基础测试支撑。
 
-- [ ] T001 Create the Spring Boot backend skeleton in `backend/pom.xml`, `backend/src/main/java/com/facecheck/FaceCheckApplication.java`, and `backend/src/main/resources/application.yml` (Depends on: none; Accept: `./backend/mvnw -q -DskipTests verify` can compile a placeholder application).
-- [ ] T002 [P] Create the Flutter app skeleton in `app/pubspec.yaml`, `app/lib/main.dart`, and `app/analysis_options.yaml` (Depends on: none; Accept: `flutter pub get` succeeds and `flutter analyze` can run on the scaffold).
-- [ ] T003 [P] Configure Docker Compose for PostgreSQL, Redis, and RabbitMQ in `docker-compose.yml` (Depends on: none; Accept: `docker compose up -d postgres redis rabbitmq` starts healthy services with predictable ports and credentials).
-- [ ] T004 Configure Spring profiles and environment binding in `backend/src/main/resources/application.yml`, `backend/src/main/resources/application-local.yml`, `backend/src/main/resources/application-test.yml`, and `backend/src/main/resources/application-prod.yml` (Depends on: T001; Accept: backend can boot under `local`, `test`, and `prod` profiles without exposing cloud credentials to the app).
-- [ ] T005 Configure the Flyway migration layout in `backend/src/main/resources/db/migration/` and disable `ddl-auto` in `backend/src/main/resources/application.yml` (Depends on: T001, T004; Accept: Flyway is the only schema management path and Hibernate auto DDL is off for non-test profiles).
-- [ ] T006 Implement a base health endpoint in `backend/src/main/java/com/facecheck/infrastructure/health/AppHealthController.java` and `backend/src/main/java/com/facecheck/infrastructure/health/DependencyHealthService.java` (Depends on: T001, T004; Accept: a health endpoint reports app readiness without leaking secrets).
-- [ ] T007 Implement `ApiResponse`, `ErrorCode`, `BusinessException`, and global exception mapping in `backend/src/main/java/com/facecheck/common/api/ApiResponse.java`, `backend/src/main/java/com/facecheck/common/error/ErrorCode.java`, `backend/src/main/java/com/facecheck/common/error/BusinessException.java`, and `backend/src/main/java/com/facecheck/common/error/GlobalExceptionHandler.java` (Depends on: T001, T004; Accept: success and failure responses share one JSON envelope with stable business error codes).
-- [ ] T008 Configure structured request logging and trace propagation in `backend/src/main/resources/logback-spring.xml` and `backend/src/main/java/com/facecheck/infrastructure/logging/RequestTraceFilter.java` (Depends on: T001, T004; Accept: every request writes a traceable request ID and basic latency fields to logs).
-- [ ] T009 Create PostgreSQL Testcontainers base support and Redis/RabbitMQ test configuration in `backend/src/test/java/com/facecheck/support/PostgresContainerSupport.java`, `backend/src/test/java/com/facecheck/support/RedisRabbitContainerSupport.java`, and `backend/src/test/resources/application-test.yml` (Depends on: T003, T004, T005; Accept: backend integration tests can boot against containerized PostgreSQL and optional containerized Redis/RabbitMQ).
+- [X] T001 Create the Spring Boot backend skeleton in `backend/pom.xml`, `backend/src/main/java/com/facecheck/FaceCheckApplication.java`, and `backend/src/main/resources/application.yml` (Depends on: none; Accept: `cd backend && ./mvnw -q -DskipTests verify` can compile a placeholder application).
+- [X] T002 [P] Create the Flutter app skeleton in `app/pubspec.yaml`, `app/lib/main.dart`, and `app/analysis_options.yaml` (Depends on: none; Accept: `flutter pub get` succeeds and `flutter analyze` can run on the scaffold).
+- [X] T003 [P] Configure Docker Compose for PostgreSQL, Redis, and RabbitMQ in `docker-compose.yml` (Depends on: none; Accept: `docker compose up -d postgres redis rabbitmq` starts healthy services with predictable ports and credentials).
+- [X] T004 Configure Spring profiles and environment binding in `backend/src/main/resources/application.yml`, `backend/src/main/resources/application-local.yml`, `backend/src/main/resources/application-test.yml`, and `backend/src/main/resources/application-prod.yml` (Depends on: T001; Accept: backend can boot under `local`, `test`, and `prod` profiles without exposing cloud credentials to the app).
+- [X] T005 Configure the Flyway migration layout in `backend/src/main/resources/db/migration/` and disable `ddl-auto` in `backend/src/main/resources/application.yml` (Depends on: T001, T004; Accept: Flyway is the only schema management path and Hibernate auto DDL is off for non-test profiles).
+- [X] T006 Implement a base health endpoint in `backend/src/main/java/com/facecheck/infrastructure/health/AppHealthController.java` and `backend/src/main/java/com/facecheck/infrastructure/health/DependencyHealthService.java` (Depends on: T001, T004; Accept: a health endpoint reports app readiness without leaking secrets).
+- [X] T007 Implement `ApiResponse`, `ErrorCode`, `BusinessException`, and global exception mapping in `backend/src/main/java/com/facecheck/common/api/ApiResponse.java`, `backend/src/main/java/com/facecheck/common/error/ErrorCode.java`, `backend/src/main/java/com/facecheck/common/error/BusinessException.java`, and `backend/src/main/java/com/facecheck/common/error/GlobalExceptionHandler.java` (Depends on: T001, T004; Accept: success and failure responses share one JSON envelope with stable business error codes).
+- [X] T008 Configure structured request logging and trace propagation in `backend/src/main/resources/logback-spring.xml` and `backend/src/main/java/com/facecheck/infrastructure/logging/RequestTraceFilter.java` (Depends on: T001, T004; Accept: every request writes a traceable request ID and basic latency fields to logs).
+- [X] T009 Create PostgreSQL Testcontainers base support and Redis/RabbitMQ test configuration in `backend/src/test/java/com/facecheck/support/PostgresContainerSupport.java`, `backend/src/test/java/com/facecheck/support/RedisRabbitContainerSupport.java`, and `backend/src/test/resources/application-test.yml` (Depends on: T003, T004, T005; Accept: backend integration tests can boot against containerized PostgreSQL and optional containerized Redis/RabbitMQ).
 
 ---
 
@@ -151,9 +151,9 @@ description: "Task list for 管理员场次人脸签到系统 implementation"
 
 ## Phase 6: User Story 2 & User Story 3 - Records, Exception Review, and Audit (Stage 6)
 
-**Goal**: 支持普通用户查看个人签到记录，管理员查看全局/场次记录与异常尝试，并为关键操作生成审计日志；系统配置入口作为第二阶段扩展保留。
+**Goal**: 支持普通用户查看个人签到记录，管理员查看全局/场次记录与异常尝试，并为关键操作生成审计日志；系统状态和系统配置后端能力作为第二阶段扩展保留，不阻塞当前管理员主线交付。
 
-**Independent Test**: 普通用户只能查看自己的记录；管理员能按场次、用户、时间、状态查询记录与异常尝试；管理员处理异常时会留下审计日志；系统配置变更可持久化。
+**Independent Test**: 普通用户只能查看自己的记录；管理员能按场次、用户、时间、状态查询记录与异常尝试；管理员处理异常时会留下审计日志；若启用第二阶段扩展，则系统配置变更可持久化。
 
 ### Tests for User Story 2 & User Story 3 ⚠️
 
@@ -172,7 +172,7 @@ description: "Task list for 管理员场次人脸签到系统 implementation"
 - [ ] T067 [US3] Implement system-state query service and controller in `backend/src/main/java/com/facecheck/admin/service/SystemStateService.java` and `backend/src/main/java/com/facecheck/admin/api/SystemStateController.java` (Depends on: T018, T019, T020, T021, T062; Accept: admins can inspect database, Redis, RabbitMQ, FRS, and OBS health summaries from one backend endpoint).
 - [ ] T068 [US3] Wire `AuditLogService` into session, face-photo, review, and config flows in `backend/src/main/java/com/facecheck/admin/service/AuditLogService.java` and the calling services from earlier tasks (Depends on: T062, T039, T034, T065, T066; Accept: admin-triggered mutations write durable audit rows with actor, target, action, and summary details).
 
-**Checkpoint**: Record query, admin exception handling, system state/config, and audit logging are backend-complete and independently testable.
+**Checkpoint**: Record query, admin exception handling, and audit logging are backend-complete and independently testable; system state/config endpoints remain second-stage extensions.
 
 ---
 
@@ -242,24 +242,24 @@ description: "Task list for 管理员场次人脸签到系统 implementation"
 
 ## Phase 10: User Story 3 - Flutter Admin Features (Stage 10)
 
-**Goal**: 完成管理员端用户管理、场次管理、二维码展示、记录查询、异常处理，以及第二阶段的系统状态和系统配置页面。
+**Goal**: 完成管理员端用户管理、场次管理、二维码展示、记录查询和异常处理；系统状态和系统配置页面保留为第二阶段扩展。
 
-**Independent Test**: 管理员登录后可以新增、编辑、停用用户，管理场次、查看二维码、查看场次记录与全局记录、处理异常；第二阶段再补系统状态与配置页面；普通用户无法访问任何管理员页面。
+**Independent Test**: 管理员登录后可以新增、编辑、停用用户，管理场次、查看二维码、查看场次记录与全局记录、处理异常；普通用户无法访问任何第一阶段管理员页面；第二阶段再补系统状态与配置页面。
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T092 [P] [US3] Write widget and state tests for admin user management, session management, records, and exception review pages in `app/test/features/admin/user_management_test.dart`, `app/test/features/admin/session_management_test.dart`, `app/test/features/admin/admin_records_test.dart`, and `app/test/features/admin/exception_review_test.dart` (Depends on: T076, T041, T064, T065, T066, T067; Accept: failing tests define admin-only page behavior for user create/edit/disable flows and main list/detail flows).
+- [ ] T092 [P] [US3] Write widget and state tests for admin user management, session management, records, and exception review pages in `app/test/features/admin/user_management_test.dart`, `app/test/features/admin/session_management_test.dart`, `app/test/features/admin/admin_records_test.dart`, and `app/test/features/admin/exception_review_test.dart` (Depends on: T076, T041, T064, T065; Accept: failing tests define admin-only page behavior for user create/edit/disable flows and first-stage list/detail flows without waiting for second-stage status/config pages).
 
 ### Implementation for User Story 3
 
-- [ ] T093 [US3] Implement the admin home and navigation shell in `app/lib/features/admin/admin_home_page.dart` and `app/lib/features/admin/admin_navigation.dart` (Depends on: T074, T072; Accept: admin users land on a dedicated shell with links to user management, session, record, review, and later-stage status/config features).
+- [ ] T093 [US3] Implement the admin home and navigation shell in `app/lib/features/admin/admin_home_page.dart` and `app/lib/features/admin/admin_navigation.dart` (Depends on: T074, T072; Accept: admin users land on a dedicated shell with links to first-stage user management, session, record, and review features, while reserving a place for later-stage status/config entries).
 - [ ] T093A [US3] Implement the admin user-management list and form pages in `app/lib/features/admin/users/admin_user_list_page.dart` and `app/lib/features/admin/users/admin_user_form_page.dart` (Depends on: T093, T070; Accept: admins can create, edit, and disable users from the app using username as the only business identifier).
 - [ ] T094 [US3] Implement the session management list and create/edit page in `app/lib/features/admin/sessions/admin_session_list_page.dart` and `app/lib/features/admin/sessions/admin_session_form_page.dart` (Depends on: T093, T070; Accept: admins can create, edit, publish, close, and cancel sessions from the app).
 - [ ] T095 [US3] Implement the QR display/reset page in `app/lib/features/admin/sessions/session_qr_page.dart` (Depends on: T094; Accept: admins can view the current QR payload and trigger token rotation when needed).
 - [ ] T096 [US3] Implement the session-record and global-record pages in `app/lib/features/admin/records/session_records_page.dart` and `app/lib/features/admin/records/global_records_page.dart` (Depends on: T093, T070; Accept: admins can browse records by session or globally with filters supported by the backend).
 - [ ] T097 [US3] Implement the exception review page and controller in `app/lib/features/admin/review/exception_review_page.dart` and `app/lib/features/admin/review/exception_review_controller.dart` (Depends on: T093, T070; Accept: admins can view abnormal attempts, add notes, and trigger review actions exposed by the backend).
 - [ ] T098 [US3] Implement the second-stage system-state and system-config pages in `app/lib/features/admin/system/system_state_page.dart` and `app/lib/features/admin/system/system_config_page.dart` (Depends on: T093, T070; Accept: admins can inspect dependency health and update whitelisted configuration keys after MVP delivery).
-- [ ] T099 [US3] Enforce admin-only route guards and unauthorized redirects in `app/lib/router/app_router.dart` and `app/lib/features/auth/access_policy.dart` (Depends on: T093, T093A, T094, T095, T096, T097, T098; Accept: ordinary users and anonymous callers are redirected away from every admin route).
+- [ ] T099 [US3] Enforce admin-only route guards and unauthorized redirects in `app/lib/router/app_router.dart` and `app/lib/features/auth/access_policy.dart` (Depends on: T093, T093A, T094, T095, T096, T097; Accept: ordinary users and anonymous callers are redirected away from every first-stage admin route, and second-stage status/config routes inherit the same guard when they are enabled later).
 
 **Checkpoint**: Admin Flutter features are independently testable and role-isolated.
 
@@ -293,7 +293,7 @@ description: "Task list for 管理员场次人脸签到系统 implementation"
 - **Phase 7 (Stage 7)** may start as soon as the auth and public-entry contracts from Phases 2 and 4 are stable, and can absorb later anonymous check-in or admin APIs incrementally as Phases 5-6 land.
 - **Phase 8 (Stage 8)** depends on Phase 7 and backend photo/profile/query endpoints from Phases 2, 3, and 6.
 - **Phase 9 (Stage 9)** depends on Phase 7 and backend QR/session/check-in APIs from Phases 4 and 5.
-- **Phase 10 (Stage 10)** depends on Phase 7 and backend admin/session/review/config APIs from Phases 4 and 6.
+- **Phase 10 (Stage 10)** depends on Phase 7 and backend admin/session/review APIs from Phases 4 and 6; second-stage status/config pages additionally depend on the optional config/state endpoints from Phase 6.
 - **Phase 11 (Stage 11)** depends on all desired backend and Flutter phases being complete.
 
 ### User Story Dependencies
@@ -377,10 +377,12 @@ Task: T036 Session lifecycle integration tests
 Task: T039 AttendanceSessionService
 Task: T040 QrTokenService
 
-# Admin Flutter pages after backend review/config endpoints exist
+# First-stage admin Flutter pages after backend review endpoints exist
 Task: T094 Session management page
 Task: T096 Record pages
 Task: T097 Exception review page
+
+# Second-stage admin extension after backend status/config endpoints exist
 Task: T098 System state/config pages
 ```
 
