@@ -12,6 +12,10 @@ public enum ErrorCode {
     ACCOUNT_DISABLED(HttpStatus.FORBIDDEN, "ACCOUNT_DISABLED", "The user account is not active."),
     DUPLICATE_USERNAME(HttpStatus.CONFLICT, "DUPLICATE_USERNAME", "The username is already in use."),
     FACE_PHOTO_LIMIT_REACHED(HttpStatus.CONFLICT, "FACE_PHOTO_LIMIT_REACHED", "A user can keep at most five photos."),
+    INVALID_SESSION_TIME_WINDOW(HttpStatus.BAD_REQUEST, "INVALID_SESSION_TIME_WINDOW", "The attendance session time window is invalid."),
+    INVALID_SESSION_STATUS(HttpStatus.BAD_REQUEST, "INVALID_SESSION_STATUS", "The requested attendance session transition is invalid."),
+    INVALID_QR_TOKEN(HttpStatus.NOT_FOUND, "INVALID_QR_TOKEN", "The QR token is invalid or expired."),
+    SESSION_QR_GENERATION_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "SESSION_QR_GENERATION_FAILED", "Failed to generate a QR token."),
     NOT_FOUND(HttpStatus.NOT_FOUND, "NOT_FOUND", "The requested resource does not exist."),
     SERVICE_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "SERVICE_UNAVAILABLE", "The service is temporarily unavailable."),
     INTERNAL_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "An unexpected error occurred.");

@@ -348,9 +348,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/AttendanceSessionSummary'
+                $ref: '#/components/schemas/ApiResponseAttendanceSessionSummaryList'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -372,7 +370,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AttendanceSessionSummary'
+                $ref: '#/components/schemas/ApiResponseAttendanceSessionSummary'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -400,7 +398,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AttendanceSessionSummary'
+                $ref: '#/components/schemas/ApiResponseAttendanceSessionSummary'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -422,7 +420,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AttendanceSessionSummary'
+                $ref: '#/components/schemas/ApiResponseAttendanceSessionSummary'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -444,7 +442,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AttendanceSessionSummary'
+                $ref: '#/components/schemas/ApiResponseAttendanceSessionSummary'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -466,7 +464,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AttendanceSessionSummary'
+                $ref: '#/components/schemas/ApiResponseAttendanceSessionSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/admin/sessions/{sessionId}/qr-token:
+    get:
+      tags: [AdminSessions]
+      summary: Read current session QR token
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SessionId'
+      responses:
+        '200':
+          description: Current QR token returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseQrTokenResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -488,7 +508,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/QrTokenResponse'
+                $ref: '#/components/schemas/ApiResponseQrTokenResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -590,7 +610,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SessionEntryResponse'
+                $ref: '#/components/schemas/ApiResponseSessionEntryResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -878,6 +898,76 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/FacePhotoSummary'
+        error:
+          nullable: true
+        traceId:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+    ApiResponseAttendanceSessionSummary:
+      type: object
+      required: [success, data, timestamp]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        data:
+          $ref: '#/components/schemas/AttendanceSessionSummary'
+        error:
+          nullable: true
+        traceId:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+    ApiResponseAttendanceSessionSummaryList:
+      type: object
+      required: [success, data, timestamp]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AttendanceSessionSummary'
+        error:
+          nullable: true
+        traceId:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+    ApiResponseQrTokenResponse:
+      type: object
+      required: [success, data, timestamp]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        data:
+          $ref: '#/components/schemas/QrTokenResponse'
+        error:
+          nullable: true
+        traceId:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+    ApiResponseSessionEntryResponse:
+      type: object
+      required: [success, data, timestamp]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        data:
+          $ref: '#/components/schemas/SessionEntryResponse'
         error:
           nullable: true
         traceId:
