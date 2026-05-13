@@ -1,34 +1,39 @@
+import 'package:facecheck_app/shared/providers/app_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  runApp(const FaceCheckApp());
+  runApp(const ProviderScope(child: FaceCheckApp()));
 }
 
-class FaceCheckApp extends StatelessWidget {
+class FaceCheckApp extends ConsumerStatefulWidget {
   const FaceCheckApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'FaceCheck',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1565C0)),
-        useMaterial3: true,
-      ),
-      home: const _BootstrapPage(),
-    );
-  }
+  ConsumerState<FaceCheckApp> createState() => _FaceCheckAppState();
 }
 
-class _BootstrapPage extends StatelessWidget {
-  const _BootstrapPage();
+class _FaceCheckAppState extends ConsumerState<FaceCheckApp> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+      () => ref.read(authStateNotifierProvider.notifier).restoreSession(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text('FaceCheck bootstrap'),
+    final router = ref.watch(appRouterProvider);
+
+    return MaterialApp.router(
+      title: 'FaceCheck',
+      debugShowCheckedModeBanner: false,
+      routerConfig: router,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1565C0)),
+        scaffoldBackgroundColor: const Color(0xFFF4F7FB),
+        useMaterial3: true,
       ),
     );
   }
