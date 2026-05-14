@@ -18,3 +18,4 @@ app/.packages
 app/.pub-cache/
 app/build/
 app/android/.gradle/
+env/

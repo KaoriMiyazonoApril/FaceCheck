@@ -25,6 +25,19 @@ void main() {
     expect(find.text('FaceCheck Sign in'), findsOneWidget);
   });
 
+  testWidgets('redirects anonymous users away from face photo routes', (
+    WidgetTester tester,
+  ) async {
+    await _pumpRouter(
+      tester,
+      state: const AuthState(),
+      session: null,
+      initialLocation: AppRoutePaths.facePhotos,
+    );
+
+    expect(find.text('FaceCheck Sign in'), findsOneWidget);
+  });
+
   testWidgets('redirects ordinary users away from admin routes', (
     WidgetTester tester,
   ) async {

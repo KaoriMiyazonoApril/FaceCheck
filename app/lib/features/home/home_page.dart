@@ -51,10 +51,21 @@ class HomePage extends ConsumerWidget {
             onTap: () => context.go(AppRoutePaths.publicSessionEntry),
           ),
           _HomeActionCard(
-            title: 'My profile area',
-            subtitle:
-                'Signed-in user routes stay behind the authenticated route group.',
+            title: 'My profile',
+            subtitle: 'Update your username and password safely in-app.',
             onTap: () => context.go(AppRoutePaths.profile),
+          ),
+          _HomeActionCard(
+            title: 'Face photo library',
+            subtitle:
+                'Review photo processing status, upload new photos, or replace existing ones.',
+            onTap: () => context.go(AppRoutePaths.facePhotos),
+          ),
+          _HomeActionCard(
+            title: 'Attendance history',
+            subtitle:
+                'See only your own validated attendance records and status notes.',
+            onTap: () => context.go(AppRoutePaths.attendanceRecords),
           ),
           if (session.isAdmin)
             _HomeActionCard(

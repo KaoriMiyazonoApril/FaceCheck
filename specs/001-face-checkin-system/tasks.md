@@ -5,7 +5,7 @@ description: "Task list for 管理员场次人脸签到系统 implementation"
 
 # Tasks: 管理员场次人脸签到系统
 
-**Input**: Design documents from `/specs/001-face-checkin-system/`  
+**Input**: Design documents from `/specs/001-face-checkin-system/`
 **Prerequisites**: [plan.md](./plan.md), [spec.md](./spec.md), [research.md](./research.md), [data-model.md](./data-model.md), [openapi.yaml](./contracts/openapi.yaml)
 
 **Tests**: 核心业务测试是强制项。后端必须覆盖认证、权限、用户名唯一、个人资料接口、管理员用户管理、照片上传、OBS/FRS 适配、人脸注册任务、签到流程、限流、幂等、防重复签到、审计日志，以及 PostgreSQL/Redis/RabbitMQ 的容器化测试；Flutter 必须覆盖登录、路由、状态流转、扫码签到和关键页面测试；相机、扫码、拍照上传、网络访问和未登录签到链路必须在 Android 模拟器或真机验证。
@@ -201,16 +201,16 @@ description: "Task list for 管理员场次人脸签到系统 implementation"
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T077 [P] [US2] Write widget and state tests for profile, face-photo, and personal-record pages in `app/test/features/profile/profile_page_test.dart`, `app/test/features/face/face_photo_page_test.dart`, and `app/test/features/records/personal_records_page_test.dart` (Depends on: T076; Accept: failing tests define username/password profile behavior, five-photo guard behavior, and ownership-only access expectations).
+- [X] T077 [P] [US2] Write widget and state tests for profile, face-photo, and personal-record pages in `app/test/features/profile/profile_page_test.dart`, `app/test/features/face/face_photo_page_test.dart`, and `app/test/features/records/personal_records_page_test.dart` (Depends on: T076; Accept: failing tests define username/password profile behavior, five-photo guard behavior, and ownership-only access expectations).
 
 ### Implementation for User Story 2
 
-- [ ] T078 [US2] Implement the personal profile page and controller in `app/lib/features/profile/profile_page.dart` and `app/lib/features/profile/profile_controller.dart` (Depends on: T074, T070, T071; Accept: ordinary users can view and edit only their own username/password fields returned by `/api/me/profile`).
-- [ ] T079 [US2] Implement the face-photo management page and repository in `app/lib/features/face/face_photo_page.dart` and `app/lib/features/face/face_photo_repository.dart` (Depends on: T078, T070; Accept: the page can load the current user’s face-photo list, render status/failure information, and surface current photo-count usage).
-- [ ] T080 [US2] Implement image selection or camera-based photo upload in `app/lib/features/face/face_photo_capture_service.dart` and `app/lib/features/face/face_photo_upload_controller.dart` (Depends on: T079, T076; Accept: ordinary users can choose or capture an image and upload it only through backend APIs, and the client blocks the 6th photo before submission).
-- [ ] T081 [US2] Implement photo delete/replace actions and status cards in `app/lib/features/face/widgets/face_photo_status_card.dart` and `app/lib/features/face/face_photo_actions.dart` (Depends on: T079, T080; Accept: active, pending, failed, and deleted states are visible and actionable where allowed).
-- [ ] T082 [US2] Implement the personal attendance-record page and controller in `app/lib/features/records/personal_records_page.dart` and `app/lib/features/records/personal_records_controller.dart` (Depends on: T078, T070; Accept: the page shows only the current user’s record history with minimal result fields).
-- [ ] T083 [US2] Harden signed-in user route guards for profile, face photos, and records in `app/lib/router/app_router.dart` and `app/lib/features/auth/access_policy.dart` (Depends on: T072, T078, T079, T082; Accept: anonymous users cannot open personal pages without first logging in).
+- [X] T078 [US2] Implement the personal profile page and controller in `app/lib/features/profile/profile_page.dart` and `app/lib/features/profile/profile_controller.dart` (Depends on: T074, T070, T071; Accept: ordinary users can view and edit only their own username/password fields returned by `/api/me/profile`).
+- [X] T079 [US2] Implement the face-photo management page and repository in `app/lib/features/face/face_photo_page.dart` and `app/lib/features/face/face_photo_repository.dart` (Depends on: T078, T070; Accept: the page can load the current user’s face-photo list, render status/failure information, and surface current photo-count usage).
+- [X] T080 [US2] Implement image selection or camera-based photo upload in `app/lib/features/face/face_photo_capture_service.dart` and `app/lib/features/face/face_photo_upload_controller.dart` (Depends on: T079, T076; Accept: ordinary users can choose or capture an image and upload it only through backend APIs, and the client blocks the 6th photo before submission).
+- [X] T081 [US2] Implement photo delete/replace actions and status cards in `app/lib/features/face/widgets/face_photo_status_card.dart` and `app/lib/features/face/face_photo_actions.dart` (Depends on: T079, T080; Accept: active, pending, failed, and deleted states are visible and actionable where allowed).
+- [X] T082 [US2] Implement the personal attendance-record page and controller in `app/lib/features/records/personal_records_page.dart` and `app/lib/features/records/personal_records_controller.dart` (Depends on: T078, T070; Accept: the page shows only the current user’s record history with minimal result fields).
+- [X] T083 [US2] Harden signed-in user route guards for profile, face photos, and records in `app/lib/router/app_router.dart` and `app/lib/features/auth/access_policy.dart` (Depends on: T072, T078, T079, T082; Accept: anonymous users cannot open personal pages without first logging in).
 
 **Checkpoint**: Ordinary-user Flutter flows are independently testable end to end against the stabilized backend contracts.
 

@@ -56,6 +56,24 @@ class ApiClient {
     }
   }
 
+  Future<T> putEnvelope<T>(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+    required JsonFactory<T> decoder,
+  }) async {
+    try {
+      final response = await _dio.put<Object?>(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+      );
+      return unwrapEnvelope(response.data, decoder);
+    } on DioException catch (error) {
+      throw normalizeException(error);
+    }
+  }
+
   Future<void> postNoContent(
     String path, {
     Object? data,
@@ -72,10 +90,23 @@ class ApiClient {
     }
   }
 
-  static T unwrapEnvelope<T>(
-    Object? payload,
-    JsonFactory<T> decoder,
-  ) {
+  Future<void> deleteNoContent(
+    String path, {
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+  }) async {
+    try {
+      await _dio.delete<Object?>(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+      );
+    } on DioException catch (error) {
+      throw normalizeException(error);
+    }
+  }
+
+  static T unwrapEnvelope<T>(Object? payload, JsonFactory<T> decoder) {
     final root = _asMap(payload);
     if (root['success'] != true) {
       throw _exceptionFromEnvelope(root, null);

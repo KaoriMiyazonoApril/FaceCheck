@@ -5,6 +5,8 @@ class AppRoutePaths {
   static const String login = '/login';
   static const String home = '/home';
   static const String profile = '/me/profile';
+  static const String facePhotos = '/me/face-photos';
+  static const String attendanceRecords = '/me/attendance-records';
   static const String publicSessionEntry = '/checkin/session-entry';
   static const String admin = '/admin';
 }

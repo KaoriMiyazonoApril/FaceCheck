@@ -120,4 +120,26 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       );
     }
   }
+
+  Future<void> replaceUsername(String username) async {
+    final currentSession = state.session;
+    if (currentSession == null) {
+      return;
+    }
+
+    final updatedSession = AuthSession(
+      accessToken: currentSession.accessToken,
+      tokenType: currentSession.tokenType,
+      expiresIn: currentSession.expiresIn,
+      userId: currentSession.userId,
+      username: username,
+      role: currentSession.role,
+    );
+
+    await _sessionRestoreService.persistSession(updatedSession);
+    state = state.copyWith(
+      session: updatedSession,
+      clearError: true,
+    );
+  }
 }

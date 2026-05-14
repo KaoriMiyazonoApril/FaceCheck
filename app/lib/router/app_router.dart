@@ -1,6 +1,9 @@
 import 'package:facecheck_app/features/auth/access_policy.dart';
 import 'package:facecheck_app/features/auth/login_page.dart';
+import 'package:facecheck_app/features/face/face_photo_page.dart';
 import 'package:facecheck_app/features/home/home_page.dart';
+import 'package:facecheck_app/features/profile/profile_page.dart';
+import 'package:facecheck_app/features/records/personal_records_page.dart';
 import 'package:facecheck_app/shared/models/auth_session.dart';
 import 'package:facecheck_app/shared/widgets/placeholder_page.dart';
 import 'package:flutter/widgets.dart';
@@ -50,11 +53,19 @@ class AppRouter {
         GoRoute(
           path: AppRoutePaths.profile,
           builder: (BuildContext context, GoRouterState state) {
-            return const PlaceholderPage(
-              title: 'My Profile',
-              message:
-                  'Signed-in user profile, face photo, and record pages will be added in Stage 8.',
-            );
+            return const ProfilePage();
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.facePhotos,
+          builder: (BuildContext context, GoRouterState state) {
+            return const FacePhotoPage();
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.attendanceRecords,
+          builder: (BuildContext context, GoRouterState state) {
+            return const PersonalRecordsPage();
           },
         ),
         GoRoute(
