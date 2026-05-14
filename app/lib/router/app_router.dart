@@ -1,4 +1,9 @@
 import 'package:facecheck_app/features/auth/access_policy.dart';
+import 'package:facecheck_app/features/checkin/anonymous_access_policy.dart';
+import 'package:facecheck_app/features/checkin/checkin_capture_page.dart';
+import 'package:facecheck_app/features/checkin/checkin_result_page.dart';
+import 'package:facecheck_app/features/checkin/qr_scan_page.dart';
+import 'package:facecheck_app/features/checkin/session_confirm_page.dart';
 import 'package:facecheck_app/features/auth/login_page.dart';
 import 'package:facecheck_app/features/face/face_photo_page.dart';
 import 'package:facecheck_app/features/home/home_page.dart';
@@ -19,6 +24,13 @@ class AppRouter {
     return GoRouter(
       initialLocation: initialLocation,
       redirect: (BuildContext context, GoRouterState state) {
+        final anonymousRedirect = AnonymousAccessPolicy.redirectFor(
+          state.uri,
+          session,
+        );
+        if (anonymousRedirect != null) {
+          return anonymousRedirect;
+        }
         return AccessPolicy.redirectFor(state.uri.path, session);
       },
       routes: <GoRoute>[
@@ -43,10 +55,33 @@ class AppRouter {
         GoRoute(
           path: AppRoutePaths.publicSessionEntry,
           builder: (BuildContext context, GoRouterState state) {
-            return const PlaceholderPage(
-              title: 'Session Check-in',
-              message:
-                  'The public QR session confirmation flow will be implemented in Stage 9.',
+            return QrScanPage(
+              initialQrToken: state.uri.queryParameters['qrToken'],
+            );
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.publicSessionConfirm,
+          builder: (BuildContext context, GoRouterState state) {
+            return SessionConfirmPage(
+              qrToken: state.uri.queryParameters['qrToken'] ?? '',
+            );
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.publicCheckinCapture,
+          builder: (BuildContext context, GoRouterState state) {
+            return CheckinCapturePage(
+              qrToken: state.uri.queryParameters['qrToken'] ?? '',
+              sessionName: state.uri.queryParameters['sessionName'] ?? '',
+            );
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.publicCheckinResult,
+          builder: (BuildContext context, GoRouterState state) {
+            return CheckinResultPage(
+              attemptId: state.uri.queryParameters['attemptId'] ?? '',
             );
           },
         ),

@@ -98,7 +98,7 @@
   对应明文密码：
 
   - admin / Admin123!
-  - alice / User123!
+  - alice / User123!(我本地改成了user123!)
 
   退出：
 

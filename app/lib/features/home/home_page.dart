@@ -47,7 +47,7 @@ class HomePage extends ConsumerWidget {
           _HomeActionCard(
             title: 'Public QR session flow',
             subtitle:
-                'Anonymous session entry remains publicly accessible and role-isolated.',
+                'Scan a session QR code, confirm it, capture one photo, and stay isolated from signed-in routes.',
             onTap: () => context.go(AppRoutePaths.publicSessionEntry),
           ),
           _HomeActionCard(

@@ -8,6 +8,9 @@ class AppRoutePaths {
   static const String facePhotos = '/me/face-photos';
   static const String attendanceRecords = '/me/attendance-records';
   static const String publicSessionEntry = '/checkin/session-entry';
+  static const String publicSessionConfirm = '/checkin/session-confirm';
+  static const String publicCheckinCapture = '/checkin/capture';
+  static const String publicCheckinResult = '/checkin/result';
   static const String admin = '/admin';
 }
 

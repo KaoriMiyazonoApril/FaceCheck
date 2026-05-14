@@ -1,8 +1,12 @@
 import 'package:facecheck_app/features/auth/access_policy.dart';
 import 'package:facecheck_app/features/auth/auth_state_notifier.dart';
 import 'package:facecheck_app/features/auth/session_restore_service.dart';
+import 'package:facecheck_app/features/checkin/checkin_repository.dart';
+import 'package:facecheck_app/features/checkin/qr_scan_page.dart';
 import 'package:facecheck_app/router/app_router.dart';
 import 'package:facecheck_app/services/auth_api_service.dart';
+import 'package:facecheck_app/services/api_client.dart';
+import 'package:facecheck_app/services/auth_interceptor.dart';
 import 'package:facecheck_app/services/secure_storage_service.dart';
 import 'package:facecheck_app/shared/models/app_role.dart';
 import 'package:facecheck_app/shared/models/auth_session.dart';
@@ -73,6 +77,47 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('redirects malformed anonymous capture routes back to scan entry', (
+    WidgetTester tester,
+  ) async {
+    await _pumpRouter(
+      tester,
+      state: const AuthState(),
+      session: null,
+      initialLocation: AppRoutePaths.publicCheckinCapture,
+    );
+
+    expect(find.text('Scan the FaceCheck session QR code'), findsOneWidget);
+  });
+
+  testWidgets('allows anonymous users to open result routes with attempt ids', (
+    WidgetTester tester,
+  ) async {
+    await _pumpRouter(
+      tester,
+      state: const AuthState(),
+      session: null,
+      initialLocation:
+          '${AppRoutePaths.publicCheckinResult}?attemptId=attempt-1',
+      overrides: <Override>[
+        checkinRepositoryProvider.overrideWithValue(
+          _StaticCheckinRepository(
+            const CheckinAttemptSummary(
+              attemptId: 'attempt-1',
+              sessionId: 'session-1',
+              sessionName: 'Morning Roll Call',
+              status: 'DUPLICATE_CHECKIN',
+              resultCode: 'DUPLICATE_CHECKIN',
+              resultMessage: '',
+            ),
+          ),
+        ),
+      ],
+    );
+
+    expect(find.text('Already checked in'), findsOneWidget);
+  });
 }
 
 Future<void> _pumpRouter(
@@ -80,6 +125,7 @@ Future<void> _pumpRouter(
   required AuthState state,
   required AuthSession? session,
   required String initialLocation,
+  List<Override> overrides = const <Override>[],
 }) async {
   final notifier = _StaticAuthStateNotifier(state);
   final router = AppRouter.buildRouter(
@@ -92,6 +138,15 @@ Future<void> _pumpRouter(
       overrides: <Override>[
         authStateNotifierProvider.overrideWith((Ref ref) => notifier),
         secureKeyValueStoreProvider.overrideWithValue(_MemoryStore()),
+        qrScannerSurfaceBuilderProvider.overrideWithValue(
+          (
+            BuildContext context,
+            void Function(String rawPayload) onScan,
+          ) {
+            return const SizedBox.shrink();
+          },
+        ),
+        ...overrides,
       ],
       child: MaterialApp.router(routerConfig: router),
     ),
@@ -177,5 +232,25 @@ AuthSession _adminSession() {
     userId: '2',
     username: 'admin',
     role: AppRole.admin,
+  );
+}
+
+class _StaticCheckinRepository extends CheckinRepository {
+  _StaticCheckinRepository(this.attempt) : super(_dummyApiClient());
+
+  final CheckinAttemptSummary attempt;
+
+  @override
+  Future<CheckinAttemptSummary> fetchAttempt(String attemptId) async {
+    return attempt;
+  }
+}
+
+ApiClient _dummyApiClient() {
+  return ApiClient(
+    baseUrl: 'http://localhost',
+    authInterceptor: AuthInterceptor(
+      readAccessToken: () async => null,
+    ),
   );
 }
