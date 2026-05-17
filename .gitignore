@@ -1,4 +1,3 @@
-.agents
 .DS_Store
 Thumbs.db
 .env
@@ -8,7 +7,13 @@ Thumbs.db
 .vscode/
 *.iml
 *.log
+*.orig
+*.rej
 *.swp
+*.temp
+*.tmp
+*~
+*_test_output*.txt
 backend/target/
 backend/.mvn-home/
 app/.dart_tool/

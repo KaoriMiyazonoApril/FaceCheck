@@ -1,19 +1,3 @@
-可以，按这个顺序在 Windows 上启动最稳。
-
-  当前 App 真正可实测的是：
-
-  - 登录
-  - 首页
-  - 个人资料页
-  - 个人人脸照片页
-  - 个人签到记录页
-
-  当前 App 还不能实测的是：
-
-  - 扫码签到链路
-  - 管理员页面
-    这两块在 Phase 9/10，现在还是占位页。
-
   1. 先启动基础设施
 
     在 PowerShell 里：
@@ -43,27 +27,11 @@
 
   在新的 PowerShell 窗口里：
 
-  cd C:\Users\alvinding\desktop\FaceCheck\backend
 
-  $env:SPRING_PROFILES_ACTIVE="local"
-  $env:DB_URL="jdbc:postgresql://localhost:5432/facecheck"
-  $env:DB_USERNAME="facecheck"
-  $env:DB_PASSWORD="facecheck"
 
-  $env:REDIS_HOST="localhost"
-  $env:REDIS_PORT="6379"
+cd C:\Users\alvinding\Desktop\FaceCheck\backend
 
-  $env:RABBITMQ_HOST="localhost"
-  $env:RABBITMQ_PORT="5672"
-  $env:RABBITMQ_USERNAME="facecheck"
-  $env:RABBITMQ_PASSWORD="facecheck"
-
-  $env:JWT_SECRET="change-this-to-a-long-random-local-secret"
-  $env:HUAWEI_CLOUD_ENABLED="false"
-
-  $env:SPRING_RABBITMQ_LISTENER_SIMPLE_AUTO_STARTUP="true"
-
- .\mvnw.cmd spring-boot​​
+.\mvnw.cmd spring-boot:run
 
   说明：
 
@@ -98,21 +66,13 @@
   对应明文密码：
 
   - admin / Admin123!
-  - alice / User123!(我本地改成了user123!)
+  - alice / User123!
 
   退出：
 
   \q
 
   4. 启动 Android App
-
-    建议先用 Android 模拟器，不要先上真机。
-
-  原因是当前 app/lib/shared/config/app_env.dart:1 对 Android 固定用了：
-
-  - http://10.0.2.2:8080
-
-  这只适用于 Android Emulator。
 
   先在 Android Studio 里启动模拟器，然后在 PowerShell 里：
 
@@ -125,39 +85,4 @@
 
   C:\Users\alvinding\flutter\bin\flutter.bat run
 
-  就行。
-
-  5. 你现在能怎么测
-
-    用 alice / User123! 登录后，可以测：
-
-  - 改用户名、改密码
-  - 上传人脸照片
-  - 删除/替换人脸照片
-  - 第 6 张照片前端拦截
-  - 个人签到记录页空态
-
-  用 admin / Admin123! 登录后：
-
-  - 目前 App 里只能验证登录成功和进入管理员占位入口
-  - 真正的管理员功能页还没做完
-
-  6. 如果你想用真机而不是模拟器
-
-    当前代码不能直接用真机连后端，因为 10.0.2.2 是模拟器专用地址。
-    真机要先手改 app/lib/shared/config/app_env.dart:1：
-
-  把 Android 分支的 baseUrl 改成你 Windows 主机的局域网 IP，比如：
-
-  baseUrl: 'http://192.168.1.23:8080'
-
-
-  - 后端起来了，但照片一直不转 ACTIVE
-      - 你大概率没加 SPRING_RABBITMQ_LISTENER_SIMPLE_AUTO_STARTUP=true
-  - App 登录报网络错
-      - 先确认后端健康检查通了
-      - 模拟器场景必须是 10.0.2.2:8080
-  - 用真机连不上
-      - 这是当前 app_env.dart 的限制，不是后端坏了
-
-  如果你要，我下一条可以直接给你一份“Windows 实测最短命令清单”，你照着三窗口复制就能跑。
+  
