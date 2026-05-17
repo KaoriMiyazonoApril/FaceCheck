@@ -1,4 +1,5 @@
 import 'package:facecheck_app/features/checkin/checkin_repository.dart';
+import 'package:facecheck_app/features/checkin/checkin_error_messages.dart';
 import 'package:facecheck_app/features/face/face_photo_capture_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -79,7 +80,7 @@ class AnonymousCheckinController extends StateNotifier<AnonymousCheckinState> {
     final selectedPhoto = state.photo;
     if (selectedPhoto == null) {
       state = state.copyWith(
-        errorMessage: 'Capture or choose one check-in photo before submitting.',
+        errorMessage: '提交前请先拍摄或选择一张签到照片。',
       );
       return null;
     }
@@ -104,7 +105,7 @@ class AnonymousCheckinController extends StateNotifier<AnonymousCheckinState> {
     } catch (error) {
       state = state.copyWith(
         isSubmitting: false,
-        errorMessage: error.toString(),
+        errorMessage: anonymousSubmitErrorMessage(error),
       );
       return null;
     }

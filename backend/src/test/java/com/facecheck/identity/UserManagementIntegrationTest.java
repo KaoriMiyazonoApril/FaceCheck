@@ -1,5 +1,6 @@
 package com.facecheck.identity;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -98,6 +99,13 @@ class UserManagementIntegrationTest extends RedisRabbitContainerSupport {
     void shouldAllowAdminCreateEditAndDisableUsers() throws Exception {
         String adminToken = bearer(adminUser);
 
+        mockMvc.perform(get("/api/admin/users")
+                        .header(HttpHeaders.AUTHORIZATION, adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[?(@.username=='regular-user')]").exists())
+                .andExpect(jsonPath("$.data[?(@.username=='another-user')]").exists())
+                .andExpect(jsonPath("$.data[?(@.username=='admin-user')]").exists());
+
         String createdUserId = mockMvc.perform(post("/api/admin/users")
                         .header(HttpHeaders.AUTHORIZATION, adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -126,6 +134,11 @@ class UserManagementIntegrationTest extends RedisRabbitContainerSupport {
                         .header(HttpHeaders.AUTHORIZATION, adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.status").value("DISABLED"));
+
+        mockMvc.perform(get("/api/admin/users")
+                        .header(HttpHeaders.AUTHORIZATION, adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[?(@.username=='managed-admin' && @.status=='DISABLED')]").exists());
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

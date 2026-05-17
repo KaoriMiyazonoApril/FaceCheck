@@ -1,5 +1,6 @@
 import 'package:facecheck_app/features/auth/access_policy.dart';
 import 'package:facecheck_app/features/checkin/session_entry_repository.dart';
+import 'package:facecheck_app/shared/config/app_test_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -32,8 +33,9 @@ class _SessionConfirmPageState extends ConsumerState<SessionConfirmPage> {
     final state = ref.watch(sessionEntryControllerProvider(widget.qrToken));
 
     return Scaffold(
+      key: AppTestKeys.sessionConfirmPage,
       appBar: AppBar(
-        title: const Text('Confirm session'),
+        title: const Text('确认场次'),
       ),
       body: state.isLoading && state.session == null
           ? const Center(child: CircularProgressIndicator())
@@ -52,7 +54,7 @@ class _SessionConfirmPageState extends ConsumerState<SessionConfirmPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(
-                              'Session unavailable',
+                              '场次不可用',
                               style: Theme.of(context).textTheme.headlineSmall,
                             ),
                             const SizedBox(height: 12),
@@ -61,7 +63,7 @@ class _SessionConfirmPageState extends ConsumerState<SessionConfirmPage> {
                             FilledButton(
                               onPressed: () =>
                                   context.go(AppRoutePaths.publicSessionEntry),
-                              child: const Text('Scan another QR'),
+                              child: const Text('重新扫码'),
                             ),
                           ],
                         ),
@@ -72,9 +74,10 @@ class _SessionConfirmPageState extends ConsumerState<SessionConfirmPage> {
                     const SizedBox(height: 16),
                     if (state.session!.canCheckin)
                       FilledButton.icon(
+                        key: AppTestKeys.anonymousCheckinStartButton,
                         onPressed: () => _continueToCapture(state.session!),
                         icon: const Icon(Icons.photo_camera_outlined),
-                        label: const Text('Continue to camera'),
+                        label: const Text('开始匿名签到'),
                       )
                     else
                       Card(
@@ -84,7 +87,7 @@ class _SessionConfirmPageState extends ConsumerState<SessionConfirmPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(
-                                'Check-in unavailable',
+                                '当前无法签到',
                                 style: Theme.of(context).textTheme.titleLarge,
                               ),
                               const SizedBox(height: 8),
@@ -98,7 +101,7 @@ class _SessionConfirmPageState extends ConsumerState<SessionConfirmPage> {
                               OutlinedButton(
                                 onPressed: () => context
                                     .go(AppRoutePaths.publicSessionEntry),
-                                child: const Text('Back to scanner'),
+                                child: const Text('返回扫码'),
                               ),
                             ],
                           ),
@@ -121,11 +124,11 @@ class _SessionConfirmPageState extends ConsumerState<SessionConfirmPage> {
 
   String _fallbackRefusalMessage(String? refusalCode) {
     return switch (refusalCode) {
-      'SESSION_NOT_STARTED' => 'This session has not started yet.',
-      'EXPIRED_SESSION' => 'This session is already past its closing time.',
-      'SESSION_CLOSED' => 'This session has already been closed.',
-      'SESSION_CANCELED' => 'This session was canceled by an administrator.',
-      _ => 'This session is not available for anonymous check-in right now.',
+      'SESSION_NOT_STARTED' => '该场次尚未开始。',
+      'EXPIRED_SESSION' => '该场次已经超过结束时间。',
+      'SESSION_CLOSED' => '该场次已经关闭。',
+      'SESSION_CANCELED' => '该场次已被管理员取消。',
+      _ => '当前场次暂时无法进行匿名签到。',
     };
   }
 }
@@ -153,28 +156,44 @@ class _SessionSummaryCard extends StatelessWidget {
               session.name,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
-            if (session.description != null && session.description!.isNotEmpty)
-              ...<Widget>[
-                const SizedBox(height: 8),
-                Text(session.description!),
-              ],
+            if (session.description != null &&
+                session.description!.isNotEmpty) ...<Widget>[
+              const SizedBox(height: 8),
+              Text(session.description!),
+            ],
             const SizedBox(height: 16),
-            Text('Status: ${session.status}'),
+            Text('状态：${_statusLabel(session.status)}'),
             const SizedBox(height: 4),
-            Text('Starts: ${session.startTime}'),
+            Text('开始时间：${_formatDateTime(session.startTime)}'),
             const SizedBox(height: 4),
-            Text('Ends: ${session.endTime}'),
+            Text('结束时间：${_formatDateTime(session.endTime)}'),
             const SizedBox(height: 16),
             Text(
               session.canCheckin
-                  ? 'You can continue to the anonymous photo step.'
-                  : (session.refusalReason ??
-                      'This session is not open for anonymous check-in.'),
+                  ? '可以继续进入匿名拍照步骤。'
+                  : (session.refusalReason ?? '当前场次未开放匿名签到。'),
               style: TextStyle(color: statusColor),
             ),
           ],
         ),
       ),
     );
+  }
+
+  String _statusLabel(String status) {
+    return switch (status.toUpperCase()) {
+      'DRAFT' => '草稿',
+      'PUBLISHED' => '已发布',
+      'CLOSED' => '已关闭',
+      'CANCELED' => '已取消',
+      _ => status,
+    };
+  }
+
+  String _formatDateTime(DateTime value) {
+    final local = value.toLocal();
+    String two(int n) => n.toString().padLeft(2, '0');
+    return '${local.year}-${two(local.month)}-${two(local.day)} '
+        '${two(local.hour)}:${two(local.minute)}';
   }
 }

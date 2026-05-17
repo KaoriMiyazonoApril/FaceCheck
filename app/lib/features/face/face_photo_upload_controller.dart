@@ -102,7 +102,7 @@ class FacePhotoUploadController extends StateNotifier<FacePhotoUploadState> {
       state = state.copyWith(
         photos: photos,
         isSubmitting: false,
-        successMessage: 'Photo removed successfully.',
+        successMessage: '照片已删除。',
         clearError: true,
       );
     } catch (error) {
@@ -120,7 +120,7 @@ class FacePhotoUploadController extends StateNotifier<FacePhotoUploadState> {
   }) async {
     if (replacePhotoId == null && state.isAtLimit) {
       state = state.copyWith(
-        errorMessage: 'You can keep at most five face photos.',
+        errorMessage: '最多只能保留五张人脸照片。',
         clearSuccess: true,
       );
       return;
@@ -146,9 +146,7 @@ class FacePhotoUploadController extends StateNotifier<FacePhotoUploadState> {
       state = state.copyWith(
         photos: photos,
         isSubmitting: false,
-        successMessage: replacePhotoId == null
-            ? 'Photo uploaded successfully.'
-            : 'Photo replaced successfully.',
+        successMessage: replacePhotoId == null ? '照片已上传。' : '照片已替换。',
         clearError: true,
       );
     } catch (error) {

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:facecheck_app/features/checkin/checkin_error_messages.dart';
 import 'package:facecheck_app/features/checkin/checkin_repository.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -89,7 +90,7 @@ class CheckinResultController extends StateNotifier<CheckinResultState> {
     } catch (error) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: error.toString(),
+        errorMessage: checkinResultErrorMessage(error),
       );
     }
   }

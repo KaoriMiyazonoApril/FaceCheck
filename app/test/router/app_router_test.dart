@@ -1,3 +1,4 @@
+import 'package:facecheck_app/features/admin/admin_repository.dart';
 import 'package:facecheck_app/features/auth/access_policy.dart';
 import 'package:facecheck_app/features/auth/auth_state_notifier.dart';
 import 'package:facecheck_app/features/auth/session_restore_service.dart';
@@ -8,6 +9,7 @@ import 'package:facecheck_app/services/auth_api_service.dart';
 import 'package:facecheck_app/services/api_client.dart';
 import 'package:facecheck_app/services/auth_interceptor.dart';
 import 'package:facecheck_app/services/secure_storage_service.dart';
+import 'package:facecheck_app/shared/config/app_test_keys.dart';
 import 'package:facecheck_app/shared/models/app_role.dart';
 import 'package:facecheck_app/shared/models/auth_session.dart';
 import 'package:facecheck_app/shared/providers/app_providers.dart';
@@ -26,7 +28,7 @@ void main() {
       initialLocation: AppRoutePaths.profile,
     );
 
-    expect(find.text('FaceCheck Sign in'), findsOneWidget);
+    expect(find.byKey(AppTestKeys.loginPage), findsOneWidget);
   });
 
   testWidgets('redirects anonymous users away from face photo routes', (
@@ -39,7 +41,7 @@ void main() {
       initialLocation: AppRoutePaths.facePhotos,
     );
 
-    expect(find.text('FaceCheck Sign in'), findsOneWidget);
+    expect(find.byKey(AppTestKeys.loginPage), findsOneWidget);
   });
 
   testWidgets('redirects ordinary users away from admin routes', (
@@ -54,8 +56,9 @@ void main() {
       initialLocation: AppRoutePaths.admin,
     );
 
-    expect(find.text('Welcome back, alice'), findsOneWidget);
-    expect(find.text('Admin Workspace'), findsNothing);
+    expect(find.byKey(AppTestKeys.homePage), findsOneWidget);
+    expect(find.text('欢迎回来，alice'), findsOneWidget);
+    expect(find.byKey(AppTestKeys.adminWorkspacePage), findsNothing);
   });
 
   testWidgets('allows admins to open the admin route group', (
@@ -70,15 +73,46 @@ void main() {
       initialLocation: AppRoutePaths.admin,
     );
 
-    expect(
-      find.text(
-        'Admin user, session, record, and review pages will be added in Stage 10.',
-      ),
-      findsOneWidget,
-    );
+    expect(find.byKey(AppTestKeys.adminWorkspacePage), findsOneWidget);
+    expect(find.text('管理员第一阶段能力'), findsOneWidget);
   });
 
-  testWidgets('redirects malformed anonymous capture routes back to scan entry', (
+  testWidgets('keeps non-admins out of nested admin routes', (
+    WidgetTester tester,
+  ) async {
+    final session = _userSession();
+
+    await _pumpRouter(
+      tester,
+      state: AuthState(session: session),
+      session: session,
+      initialLocation: AppRoutePaths.adminSystemState,
+    );
+
+    expect(find.byKey(AppTestKeys.homePage), findsOneWidget);
+    expect(find.byKey(AppTestKeys.adminSystemStatePage), findsNothing);
+  });
+
+  testWidgets('allows admins to open nested admin pages', (
+    WidgetTester tester,
+  ) async {
+    final session = _adminSession();
+
+    await _pumpRouter(
+      tester,
+      state: AuthState(session: session),
+      session: session,
+      initialLocation: AppRoutePaths.adminUsers,
+      overrides: <Override>[
+        adminRepositoryProvider.overrideWithValue(_StaticAdminRepository()),
+      ],
+    );
+
+    expect(find.byKey(AppTestKeys.adminUserListPage), findsOneWidget);
+  });
+
+  testWidgets('redirects malformed anonymous capture routes back to scan entry',
+      (
     WidgetTester tester,
   ) async {
     await _pumpRouter(
@@ -88,7 +122,7 @@ void main() {
       initialLocation: AppRoutePaths.publicCheckinCapture,
     );
 
-    expect(find.text('Scan the FaceCheck session QR code'), findsOneWidget);
+    expect(find.byKey(AppTestKeys.anonymousCheckinEntryPage), findsOneWidget);
   });
 
   testWidgets('allows anonymous users to open result routes with attempt ids', (
@@ -116,7 +150,7 @@ void main() {
       ],
     );
 
-    expect(find.text('Already checked in'), findsOneWidget);
+    expect(find.text('已完成签到'), findsOneWidget);
   });
 }
 
@@ -243,6 +277,22 @@ class _StaticCheckinRepository extends CheckinRepository {
   @override
   Future<CheckinAttemptSummary> fetchAttempt(String attemptId) async {
     return attempt;
+  }
+}
+
+class _StaticAdminRepository extends AdminRepository {
+  _StaticAdminRepository() : super(_dummyApiClient());
+
+  @override
+  Future<List<AdminManagedUser>> fetchUsers() async {
+    return const <AdminManagedUser>[
+      AdminManagedUser(
+        userId: 'user-1',
+        username: 'alice',
+        role: 'USER',
+        status: 'ACTIVE',
+      ),
+    ];
   }
 }
 

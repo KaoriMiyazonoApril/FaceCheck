@@ -1,6 +1,7 @@
 import 'package:facecheck_app/features/face/face_photo_capture_service.dart';
 import 'package:facecheck_app/features/face/face_photo_upload_controller.dart';
 import 'package:facecheck_app/features/face/widgets/face_photo_status_card.dart';
+import 'package:facecheck_app/shared/config/app_test_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -26,7 +27,8 @@ class _FacePhotoPageState extends ConsumerState<FacePhotoPage> {
     final controller = ref.read(facePhotoUploadControllerProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Face photo library')),
+      key: AppTestKeys.facePhotoPage,
+      appBar: AppBar(title: const Text('人脸照片')),
       body: state.isLoading && state.photos.isEmpty
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -41,15 +43,15 @@ class _FacePhotoPageState extends ConsumerState<FacePhotoPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            'Your recognition set',
+                            '我的识别照片',
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            '${state.photos.length} / ${FacePhotoUploadState.maxPhotos} photos in use',
+                            '${state.photos.length} / ${FacePhotoUploadState.maxPhotos} 张已占用',
                           ),
                           const SizedBox(height: 4),
-                          Text('${state.remainingSlots} upload slots remaining'),
+                          Text('${state.remainingSlots} 个可上传名额'),
                           const SizedBox(height: 16),
                           Wrap(
                             spacing: 12,
@@ -62,7 +64,7 @@ class _FacePhotoPageState extends ConsumerState<FacePhotoPage> {
                                           PhotoCaptureSource.gallery,
                                         ),
                                 icon: const Icon(Icons.photo_library_outlined),
-                                label: const Text('Upload from gallery'),
+                                label: const Text('从相册上传'),
                               ),
                               OutlinedButton.icon(
                                 onPressed: state.isSubmitting
@@ -71,7 +73,7 @@ class _FacePhotoPageState extends ConsumerState<FacePhotoPage> {
                                           PhotoCaptureSource.camera,
                                         ),
                                 icon: const Icon(Icons.photo_camera_outlined),
-                                label: const Text('Use camera'),
+                                label: const Text('拍照上传'),
                               ),
                             ],
                           ),
@@ -103,7 +105,7 @@ class _FacePhotoPageState extends ConsumerState<FacePhotoPage> {
                       child: Padding(
                         padding: EdgeInsets.all(20),
                         child: Text(
-                          'No face photos yet. Upload one from the gallery or camera to start the registration flow.',
+                          '还没有人脸照片。可从相册或相机上传，开始注册流程。',
                         ),
                       ),
                     ),

@@ -8,12 +8,7 @@ description: "Task list template for feature implementation"
 **Input**: Design documents from `/specs/[###-feature-name]/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, contracts/
 
-**Tests**: Core business tests are REQUIRED when the feature touches auth,
-roles, person management, photo upload, external face enrollment/search/compare,
-check-in, records, rate limiting, idempotency, anti-duplicate logic, or
-PostgreSQL integration. Mobile tasks that involve camera, image reading, file
-upload, network access, or the photo check-in flow MUST include Android emulator
-or real-device validation.
+**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
@@ -25,10 +20,10 @@ or real-device validation.
 
 ## Path Conventions
 
-- **Backend**: `backend/src/main/java/`, `backend/src/main/resources/db/migration/`, `backend/src/test/java/`
-- **Flutter app**: `app/lib/`, `app/test/`, `app/integration_test/`, `app/android/`
-- Adjust path names only if the approved plan documents an equivalent
-  Spring Boot monolith + Flutter app structure
+- **Single project**: `src/`, `tests/` at repository root
+- **Web app**: `backend/src/`, `frontend/src/`
+- **Mobile**: `api/src/`, `ios/src/` or `android/src/`
+- Paths shown below assume single project - adjust based on plan.md structure
 
 <!-- 
   ============================================================================
@@ -53,9 +48,9 @@ or real-device validation.
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Create backend and app structure per implementation plan
-- [ ] T002 Initialize Spring Boot monolith and Flutter app dependencies per constitution
-- [ ] T003 [P] Configure Docker Compose, local environment configuration, Huawei Cloud FRS settings, linting, and formatting
+- [ ] T001 Create project structure per implementation plan
+- [ ] T002 Initialize [language] project with [framework] dependencies
+- [ ] T003 [P] Configure linting and formatting tools
 
 ---
 
@@ -67,12 +62,12 @@ or real-device validation.
 
 Examples of foundational tasks (adjust based on your project):
 
-- [ ] T004 Setup or update PostgreSQL schema and Flyway migrations
-- [ ] T005 [P] Implement JWT authentication and authorization boundaries for user and admin flows
-- [ ] T006 [P] Setup API routing, DTO validation, and unified client/service contracts
-- [ ] T007 Create shared domain modules/entities for user, person, photo, face, session, check-in, record, and admin flows
-- [ ] T008 [P] Configure Redis support keys and RabbitMQ queues for approved support use cases, including face enrollment and sign-in recognition workloads
-- [ ] T009 Setup `FaceRecognitionProvider`, Huawei Cloud FRS client/configuration, audit logging, error handling, and environment configuration management
+- [ ] T004 Setup database schema and migrations framework
+- [ ] T005 [P] Implement authentication/authorization framework
+- [ ] T006 [P] Setup API routing and middleware structure
+- [ ] T007 Create base models/entities that all stories depend on
+- [ ] T008 Configure error handling and logging infrastructure
+- [ ] T009 Setup environment configuration management
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -84,22 +79,21 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 1 ⚠️
+### Tests for User Story 1 (OPTIONAL - only if tests requested) ⚠️
 
-> **NOTE: Write required tests FIRST, ensure they FAIL before implementation**
+> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T010 [P] [US1] Controller or contract test for [endpoint] in `backend/src/test/java/...`
-- [ ] T011 [P] [US1] Integration test for [user journey] with PostgreSQL Testcontainers in `backend/src/test/java/...`
-- [ ] T012 [P] [US1] Provider or mock-provider test for [FRS interaction] in `backend/src/test/java/...`
-- [ ] T013 [P] [US1] Android emulator or real-device validation task in `app/integration_test/...` when mobile capture, upload, or check-in flow is affected
+- [ ] T010 [P] [US1] Contract test for [endpoint] in tests/contract/test_[name].py
+- [ ] T011 [P] [US1] Integration test for [user journey] in tests/integration/test_[name].py
 
 ### Implementation for User Story 1
 
-- [ ] T014 [P] [US1] Create or update domain entities in `backend/src/main/java/...`
-- [ ] T015 [P] [US1] Implement app UI/state/service flow in `app/lib/...`
-- [ ] T016 [US1] Implement backend service, API flow, and any provider-backed recognition path in `backend/src/main/java/...`
-- [ ] T017 [US1] Add rate limiting, idempotency, duplicate prevention, upload validation, and provider-failure handling where applicable
-- [ ] T018 [US1] Add logging, auditing, and error handling for user story 1 operations
+- [ ] T012 [P] [US1] Create [Entity1] model in src/models/[entity1].py
+- [ ] T013 [P] [US1] Create [Entity2] model in src/models/[entity2].py
+- [ ] T014 [US1] Implement [Service] in src/services/[service].py (depends on T012, T013)
+- [ ] T015 [US1] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T016 [US1] Add validation and error handling
+- [ ] T017 [US1] Add logging for user story 1 operations
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -111,19 +105,17 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 2 ⚠️
+### Tests for User Story 2 (OPTIONAL - only if tests requested) ⚠️
 
-- [ ] T019 [P] [US2] Controller or contract test for [endpoint] in `backend/src/test/java/...`
-- [ ] T020 [P] [US2] Integration test for [user journey] with PostgreSQL Testcontainers in `backend/src/test/java/...`
-- [ ] T021 [P] [US2] Provider or mock-provider test for [FRS interaction] in `backend/src/test/java/...`
-- [ ] T022 [P] [US2] Android emulator or real-device validation task in `app/integration_test/...` when applicable
+- [ ] T018 [P] [US2] Contract test for [endpoint] in tests/contract/test_[name].py
+- [ ] T019 [P] [US2] Integration test for [user journey] in tests/integration/test_[name].py
 
 ### Implementation for User Story 2
 
-- [ ] T023 [P] [US2] Create or update domain entities in `backend/src/main/java/...`
-- [ ] T024 [US2] Implement backend service, consumer, controller, or provider-integration flow in `backend/src/main/java/...`
-- [ ] T025 [US2] Implement app feature or integration point in `app/lib/...`
-- [ ] T026 [US2] Integrate with User Story 1 components while preserving role, provider, and data-boundary rules
+- [ ] T020 [P] [US2] Create [Entity] model in src/models/[entity].py
+- [ ] T021 [US2] Implement [Service] in src/services/[service].py
+- [ ] T022 [US2] Implement [endpoint/feature] in src/[location]/[file].py
+- [ ] T023 [US2] Integrate with User Story 1 components (if needed)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -135,18 +127,16 @@ Examples of foundational tasks (adjust based on your project):
 
 **Independent Test**: [How to verify this story works on its own]
 
-### Tests for User Story 3 ⚠️
+### Tests for User Story 3 (OPTIONAL - only if tests requested) ⚠️
 
-- [ ] T027 [P] [US3] Controller or contract test for [endpoint] in `backend/src/test/java/...`
-- [ ] T028 [P] [US3] Integration test for [user journey] with PostgreSQL Testcontainers in `backend/src/test/java/...`
-- [ ] T029 [P] [US3] Provider or mock-provider test for [FRS interaction] in `backend/src/test/java/...`
-- [ ] T030 [P] [US3] Android emulator or real-device validation task in `app/integration_test/...` when applicable
+- [ ] T024 [P] [US3] Contract test for [endpoint] in tests/contract/test_[name].py
+- [ ] T025 [P] [US3] Integration test for [user journey] in tests/integration/test_[name].py
 
 ### Implementation for User Story 3
 
-- [ ] T031 [P] [US3] Create or update domain entities in `backend/src/main/java/...`
-- [ ] T032 [US3] Implement backend service, controller, or async processing flow in `backend/src/main/java/...`
-- [ ] T033 [US3] Implement app feature or admin UI flow in `app/lib/...`
+- [ ] T026 [P] [US3] Create [Entity] model in src/models/[entity].py
+- [ ] T027 [US3] Implement [Service] in src/services/[service].py
+- [ ] T028 [US3] Implement [endpoint/feature] in src/[location]/[file].py
 
 **Checkpoint**: All user stories should now be independently functional
 
@@ -163,10 +153,9 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] TXXX [P] Documentation updates in docs/
 - [ ] TXXX Code cleanup and refactoring
 - [ ] TXXX Performance optimization across all stories
-- [ ] TXXX [P] Additional automated tests in `backend/src/test/java/` or `app/test/`
+- [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
 - [ ] TXXX Security hardening
-- [ ] TXXX Verify admin audit coverage and security logging
-- [ ] TXXX Run Android emulator/device validation and quickstart/local environment validation
+- [ ] TXXX Run quickstart.md validation
 
 ---
 
@@ -209,14 +198,13 @@ Examples of foundational tasks (adjust based on your project):
 ## Parallel Example: User Story 1
 
 ```bash
-# Launch all tests for User Story 1 together:
-Task: "Controller or contract test for [endpoint] in backend/src/test/java/..."
-Task: "Integration test for [user journey] with PostgreSQL Testcontainers in backend/src/test/java/..."
-Task: "Android emulator or real-device validation in app/integration_test/..."
+# Launch all tests for User Story 1 together (if tests requested):
+Task: "Contract test for [endpoint] in tests/contract/test_[name].py"
+Task: "Integration test for [user journey] in tests/integration/test_[name].py"
 
-# Launch independent implementation tasks for User Story 1 together:
-Task: "Create or update domain entities in backend/src/main/java/..."
-Task: "Implement app UI/state/service flow in app/lib/..."
+# Launch all models for User Story 1 together:
+Task: "Create [Entity1] model in src/models/[entity1].py"
+Task: "Create [Entity2] model in src/models/[entity2].py"
 ```
 
 ---
@@ -258,12 +246,6 @@ With multiple developers:
 - [Story] label maps task to specific user story for traceability
 - Each user story should be independently completable and testable
 - Verify tests fail before implementing
-- Include auth, person, photo, face, provider abstraction, check-in, audit,
-  rate-limit, idempotency, duplicate-prevention, and Android validation tasks
-  whenever the feature touches them
-- Direct vendor SDK calls from business modules are not allowed; model provider
-  integration as explicit infrastructure tasks
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
-- Avoid: vague tasks, same file conflicts, cross-story dependencies that break
-  independence, or implementations that bypass the monolith and data-boundary rules
+- Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence

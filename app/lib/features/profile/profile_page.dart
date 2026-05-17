@@ -1,5 +1,6 @@
 import 'package:facecheck_app/features/auth/access_policy.dart';
 import 'package:facecheck_app/features/profile/profile_controller.dart';
+import 'package:facecheck_app/shared/config/app_test_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -34,10 +35,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Future<void> _save() async {
-    final success = await ref.read(profileControllerProvider.notifier).saveProfile(
-      username: _usernameController.text,
-      password: _passwordController.text,
-    );
+    final success =
+        await ref.read(profileControllerProvider.notifier).saveProfile(
+              username: _usernameController.text,
+              password: _passwordController.text,
+            );
     if (success && mounted) {
       _passwordController.clear();
     }
@@ -54,7 +56,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My profile')),
+      key: AppTestKeys.userProfilePage,
+      appBar: AppBar(title: const Text('个人资料')),
       body: state.isLoading && profile == null
           ? const Center(child: CircularProgressIndicator())
           : ListView(
@@ -67,18 +70,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          'Account settings',
+                          '账户设置',
                           style: Theme.of(context).textTheme.headlineSmall,
                         ),
                         const SizedBox(height: 8),
                         const Text(
-                          'Update your username or rotate your password without exposing any extra profile fields.',
+                          '当前阶段仅支持修改用户名和密码，不展示额外资料字段。',
                         ),
                         const SizedBox(height: 24),
                         TextField(
                           controller: _usernameController,
                           decoration: const InputDecoration(
-                            labelText: 'Username',
+                            labelText: '用户名',
                             border: OutlineInputBorder(),
                           ),
                         ),
@@ -87,8 +90,8 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                           controller: _passwordController,
                           obscureText: true,
                           decoration: const InputDecoration(
-                            labelText: 'New password',
-                            hintText: 'Leave blank to keep the current password',
+                            labelText: '新密码',
+                            hintText: '留空则保持当前密码不变',
                             border: OutlineInputBorder(),
                           ),
                         ),
@@ -98,8 +101,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                             spacing: 12,
                             runSpacing: 12,
                             children: <Widget>[
-                              Chip(label: Text('Role: ${profile.role}')),
-                              Chip(label: Text('Status: ${profile.status}')),
+                              Chip(
+                                  label:
+                                      Text('角色：${_roleLabel(profile.role)}')),
+                              Chip(
+                                  label: Text(
+                                      '状态：${_statusLabel(profile.status)}')),
                             ],
                           ),
                         if (state.errorMessage != null) ...<Widget>[
@@ -124,7 +131,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                         FilledButton(
                           onPressed: state.isSaving ? null : _save,
                           child: Text(
-                            state.isSaving ? 'Saving...' : 'Save changes',
+                            state.isSaving ? '保存中...' : '保存',
                           ),
                         ),
                       ],
@@ -136,21 +143,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   child: Column(
                     children: <Widget>[
                       ListTile(
-                        title: const Text('Face photo library'),
+                        title: const Text('人脸照片'),
                         subtitle: const Text(
-                          'Manage up to five active face photos and inspect their processing status.',
+                          '管理最多五张启用的人脸照片，并查看处理状态。',
                         ),
                         trailing: const Icon(Icons.chevron_right),
                         onTap: () => context.go(AppRoutePaths.facePhotos),
                       ),
                       const Divider(height: 1),
                       ListTile(
-                        title: const Text('Attendance history'),
+                        title: const Text('签到记录'),
                         subtitle: const Text(
-                          'Review only your own attendance records and the result note saved for each session.',
+                          '仅查看你自己的签到记录和每个场次的结果备注。',
                         ),
                         trailing: const Icon(Icons.chevron_right),
-                        onTap: () => context.go(AppRoutePaths.attendanceRecords),
+                        onTap: () =>
+                            context.go(AppRoutePaths.attendanceRecords),
                       ),
                     ],
                   ),
@@ -158,5 +166,22 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               ],
             ),
     );
+  }
+
+  String _roleLabel(String value) {
+    return switch (value.toUpperCase()) {
+      'ADMIN' => '管理员',
+      'USER' => '用户',
+      _ => value,
+    };
+  }
+
+  String _statusLabel(String value) {
+    return switch (value.toUpperCase()) {
+      'ACTIVE' => '启用',
+      'DISABLED' => '停用',
+      'LOCKED' => '锁定',
+      _ => value,
+    };
   }
 }

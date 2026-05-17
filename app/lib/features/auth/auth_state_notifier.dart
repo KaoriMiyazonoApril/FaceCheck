@@ -57,12 +57,19 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
       clearError: true,
     );
 
-    final session = await _sessionRestoreService.restoreSession();
-    state = state.copyWith(
-      session: session,
-      isRestoring: false,
-      clearError: true,
-    );
+    try {
+      final session = await _sessionRestoreService.restoreSession();
+      state = state.copyWith(
+        session: session,
+        isRestoring: false,
+        clearError: true,
+      );
+    } catch (_) {
+      state = state.copyWith(
+        isRestoring: false,
+        clearError: true,
+      );
+    }
   }
 
   Future<bool> login({
@@ -95,7 +102,7 @@ class AuthStateNotifier extends StateNotifier<AuthState> {
     } catch (_) {
       state = state.copyWith(
         isSubmitting: false,
-        errorMessage: 'Unable to sign in right now.',
+        errorMessage: '当前无法登录，请稍后重试。',
       );
       return false;
     }

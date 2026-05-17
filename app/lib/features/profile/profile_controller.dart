@@ -149,7 +149,7 @@ class ProfileController extends StateNotifier<ProfileState> {
       state = state.copyWith(
         profile: profile,
         isSaving: false,
-        successMessage: 'Profile updated successfully.',
+        successMessage: '个人资料已更新。',
         clearError: true,
       );
       return true;

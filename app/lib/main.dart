@@ -17,9 +17,14 @@ class _FaceCheckAppState extends ConsumerState<FaceCheckApp> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => ref.read(authStateNotifierProvider.notifier).restoreSession(),
-    );
+    Future.microtask(() async {
+      try {
+        await ref.read(authStateNotifierProvider.notifier).restoreSession();
+      } catch (_) {
+        // Secure storage may be unavailable on some emulators;
+        // the app should still render the login page.
+      }
+    });
   }
 
   @override

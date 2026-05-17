@@ -1,5 +1,6 @@
 import 'package:facecheck_app/features/auth/access_policy.dart';
 import 'package:facecheck_app/features/auth/logout_action.dart';
+import 'package:facecheck_app/shared/config/app_test_keys.dart';
 import 'package:facecheck_app/shared/providers/session_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -15,17 +16,19 @@ class HomePage extends ConsumerWidget {
     if (session == null) {
       return const Scaffold(
         body: Center(
-          child: Text('No active session'),
+          child: Text('当前没有登录会话'),
         ),
       );
     }
 
     return Scaffold(
+      key: AppTestKeys.homePage,
       appBar: AppBar(
-        title: const Text('FaceCheck Home'),
+        title: const Text('首页'),
         actions: <Widget>[
           IconButton(
-            tooltip: 'Sign out',
+            key: AppTestKeys.logoutButton,
+            tooltip: '退出登录',
             onPressed: () => LogoutAction.execute(context, ref),
             icon: const Icon(Icons.logout),
           ),
@@ -35,43 +38,40 @@ class HomePage extends ConsumerWidget {
         padding: const EdgeInsets.all(24),
         children: <Widget>[
           Text(
-            'Welcome back, ${session.username}',
+            '欢迎回来，${session.username}',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
           Text(
-            'Signed in as ${session.role.label}',
+            '当前身份：${session.role.label}',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 24),
           _HomeActionCard(
-            title: 'Public QR session flow',
-            subtitle:
-                'Scan a session QR code, confirm it, capture one photo, and stay isolated from signed-in routes.',
+            tileKey: AppTestKeys.anonymousCheckinEntryButton,
+            title: '匿名签到',
+            subtitle: '扫码进入场次，拍摄一张签到照片，并保持匿名流程与已登录功能隔离。',
             onTap: () => context.go(AppRoutePaths.publicSessionEntry),
           ),
           _HomeActionCard(
-            title: 'My profile',
-            subtitle: 'Update your username and password safely in-app.',
+            title: '个人资料',
+            subtitle: '在应用内安全修改用户名和密码。',
             onTap: () => context.go(AppRoutePaths.profile),
           ),
           _HomeActionCard(
-            title: 'Face photo library',
-            subtitle:
-                'Review photo processing status, upload new photos, or replace existing ones.',
+            title: '人脸照片',
+            subtitle: '查看照片处理状态，上传新照片，或替换已有照片。',
             onTap: () => context.go(AppRoutePaths.facePhotos),
           ),
           _HomeActionCard(
-            title: 'Attendance history',
-            subtitle:
-                'See only your own validated attendance records and status notes.',
+            title: '签到记录',
+            subtitle: '仅查看你自己的签到记录和状态备注。',
             onTap: () => context.go(AppRoutePaths.attendanceRecords),
           ),
           if (session.isAdmin)
             _HomeActionCard(
-              title: 'Admin workspace',
-              subtitle:
-                  'Admin-only routes are registered and blocked from ordinary users.',
+              title: '管理工作台',
+              subtitle: '仅管理员可进入用户、场次、记录与复核功能。',
               onTap: () => context.go(AppRoutePaths.admin),
             ),
         ],
@@ -82,11 +82,13 @@ class HomePage extends ConsumerWidget {
 
 class _HomeActionCard extends StatelessWidget {
   const _HomeActionCard({
+    this.tileKey,
     required this.title,
     required this.subtitle,
     required this.onTap,
   });
 
+  final Key? tileKey;
   final String title;
   final String subtitle;
   final VoidCallback onTap;
@@ -96,6 +98,7 @@ class _HomeActionCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: ListTile(
+        key: tileKey,
         title: Text(title),
         subtitle: Text(subtitle),
         trailing: const Icon(Icons.chevron_right),

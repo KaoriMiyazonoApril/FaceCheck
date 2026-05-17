@@ -10,6 +10,7 @@ import com.facecheck.identity.model.User;
 import com.facecheck.identity.model.UserStatus;
 import com.facecheck.identity.repo.UserRepository;
 import com.facecheck.identity.service.UserProfileService;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +25,13 @@ public class AdminUserService {
     public AdminUserService(UserRepository userRepository, PasswordService passwordService) {
         this.userRepository = userRepository;
         this.passwordService = passwordService;
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserProfileResponse> listUsers() {
+        return userRepository.findAllByOrderByCreatedAtDesc().stream()
+                .map(UserProfileService::toResponse)
+                .toList();
     }
 
     @Transactional

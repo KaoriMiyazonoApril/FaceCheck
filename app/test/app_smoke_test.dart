@@ -1,5 +1,6 @@
 import 'package:facecheck_app/main.dart';
 import 'package:facecheck_app/services/secure_storage_service.dart';
+import 'package:facecheck_app/shared/config/app_test_keys.dart';
 import 'package:facecheck_app/shared/providers/app_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,7 +19,8 @@ void main() {
     await tester.pump();
     await tester.pumpAndSettle();
 
-    expect(find.text('FaceCheck Sign in'), findsOneWidget);
+    expect(find.byKey(AppTestKeys.loginPage), findsOneWidget);
+    expect(find.text('人脸签到系统'), findsOneWidget);
   });
 }
 

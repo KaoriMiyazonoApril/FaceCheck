@@ -7,7 +7,9 @@ import com.facecheck.auth.security.AdminOnly;
 import com.facecheck.common.api.ApiResponse;
 import com.facecheck.identity.api.dto.UserProfileResponse;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.UUID;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -24,6 +26,11 @@ public class AdminUserController {
 
     public AdminUserController(AdminUserService adminUserService) {
         this.adminUserService = adminUserService;
+    }
+
+    @GetMapping
+    public ApiResponse<List<UserProfileResponse>> listUsers() {
+        return ApiResponse.success(adminUserService.listUsers());
     }
 
     @PostMapping

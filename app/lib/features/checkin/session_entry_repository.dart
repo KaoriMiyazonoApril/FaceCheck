@@ -1,4 +1,5 @@
 import 'package:facecheck_app/services/api_client.dart';
+import 'package:facecheck_app/features/checkin/checkin_error_messages.dart';
 import 'package:facecheck_app/shared/providers/app_providers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -32,9 +33,9 @@ class SessionEntryDetails {
       sessionId: payload['sessionId']?.toString() ?? '',
       name: payload['name']?.toString() ?? '',
       description: payload['description']?.toString(),
-      startTime:
-          DateTime.tryParse(payload['startTime']?.toString() ?? '')?.toLocal() ??
-              DateTime.fromMillisecondsSinceEpoch(0),
+      startTime: DateTime.tryParse(payload['startTime']?.toString() ?? '')
+              ?.toLocal() ??
+          DateTime.fromMillisecondsSinceEpoch(0),
       endTime:
           DateTime.tryParse(payload['endTime']?.toString() ?? '')?.toLocal() ??
               DateTime.fromMillisecondsSinceEpoch(0),
@@ -114,7 +115,7 @@ class SessionEntryController extends StateNotifier<SessionEntryState> {
     } catch (error) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: error.toString(),
+        errorMessage: sessionEntryErrorMessage(error),
       );
     }
   }

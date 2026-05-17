@@ -1,5 +1,6 @@
 import 'package:facecheck_app/features/auth/access_policy.dart';
 import 'package:facecheck_app/features/checkin/qr_scan_controller.dart';
+import 'package:facecheck_app/shared/config/app_test_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -35,7 +36,8 @@ class _QrScanPageState extends ConsumerState<QrScanPage> {
   @override
   void initState() {
     super.initState();
-    _manualController = TextEditingController(text: widget.initialQrToken ?? '');
+    _manualController =
+        TextEditingController(text: widget.initialQrToken ?? '');
 
     final initialQrToken = widget.initialQrToken;
     if (initialQrToken != null && initialQrToken.trim().isNotEmpty) {
@@ -52,9 +54,8 @@ class _QrScanPageState extends ConsumerState<QrScanPage> {
   }
 
   Future<void> _handlePayload(String rawPayload) async {
-    final qrToken = ref
-        .read(qrScanControllerProvider.notifier)
-        .resolvePayload(rawPayload);
+    final qrToken =
+        ref.read(qrScanControllerProvider.notifier).resolvePayload(rawPayload);
     if (qrToken == null || !mounted) {
       return;
     }
@@ -76,39 +77,42 @@ class _QrScanPageState extends ConsumerState<QrScanPage> {
     final scannerSurface = ref.watch(qrScannerSurfaceBuilderProvider);
 
     return Scaffold(
+      key: AppTestKeys.anonymousCheckinEntryPage,
       appBar: AppBar(
-        title: const Text('Public QR session entry'),
+        title: const Text('场次入口'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(24),
         children: <Widget>[
           Text(
-            'Scan the FaceCheck session QR code',
+            '扫码签到',
             style: Theme.of(context).textTheme.headlineSmall,
           ),
           const SizedBox(height: 8),
           const Text(
-            'This route stays anonymous. It only lets you enter one session, capture one check-in photo, and view this attempt result.',
+            '此流程保持匿名，只允许进入单个场次、提交一张签到照片，并查看本次尝试结果。',
           ),
           const SizedBox(height: 24),
           ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: SizedBox(
+              key: AppTestKeys.scanQrButton,
               height: 320,
               child: scannerSurface(context, _handlePayload),
             ),
           ),
           const SizedBox(height: 16),
           const Text(
-            'If the emulator camera is unavailable, paste the QR payload or raw qrToken below.',
+            '如果模拟器相机不可用，可在下方粘贴二维码内容或 qrToken。',
           ),
           const SizedBox(height: 12),
           TextField(
+            key: AppTestKeys.sessionEntryInput,
             controller: _manualController,
             minLines: 2,
             maxLines: 4,
             decoration: const InputDecoration(
-              labelText: 'QR payload or qrToken',
+              labelText: '请输入场次码',
               border: OutlineInputBorder(),
             ),
           ),
@@ -116,7 +120,7 @@ class _QrScanPageState extends ConsumerState<QrScanPage> {
           FilledButton.icon(
             onPressed: () => _handlePayload(_manualController.text),
             icon: const Icon(Icons.arrow_forward),
-            label: const Text('Load session'),
+            label: const Text('进入场次'),
           ),
           if (state.errorMessage != null) ...<Widget>[
             const SizedBox(height: 16),

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/mnt/c/Users/alvinding/flutter/bin/flutter.bat --version)",
+      "Bash(powershell.exe -NoProfile -Command \"cd C:\\\\Users\\\\alvinding\\\\Desktop\\\\FaceCheck\\\\app; flutter --version\")",
+      "Bash(powershell.exe -NoProfile -Command \"flutter devices\")",
+      "Bash(powershell.exe -NoProfile -Command \"adb devices; echo '---'; adb forward --list\")",
+      "Bash(powershell.exe *)"
+    ]
+  }
+}

@@ -6,6 +6,7 @@ import 'package:facecheck_app/services/api_client.dart';
 import 'package:facecheck_app/services/auth_api_service.dart';
 import 'package:facecheck_app/services/auth_interceptor.dart';
 import 'package:facecheck_app/services/secure_storage_service.dart';
+import 'package:facecheck_app/shared/config/app_test_keys.dart';
 import 'package:facecheck_app/shared/models/app_role.dart';
 import 'package:facecheck_app/shared/models/auth_session.dart';
 import 'package:facecheck_app/shared/providers/app_providers.dart';
@@ -35,20 +36,22 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('Account settings'), findsOneWidget);
-    expect(find.text('Role: USER'), findsOneWidget);
-    expect(find.text('Status: ACTIVE'), findsOneWidget);
-    expect(find.text('Email'), findsNothing);
-    expect(find.text('Phone'), findsNothing);
+    expect(find.byKey(AppTestKeys.userProfilePage), findsOneWidget);
+    expect(find.text('账户设置'), findsOneWidget);
+    expect(find.text('角色：用户'), findsOneWidget);
+    expect(find.text('状态：启用'), findsOneWidget);
+    expect(find.text('用户名'), findsOneWidget);
+    expect(find.text('新密码'), findsOneWidget);
+    expect(find.byType(TextField), findsNWidgets(2));
 
     await tester.enterText(find.byType(TextField).first, 'renamed-user');
     await tester.enterText(find.byType(TextField).last, 'new-password');
-    await tester.tap(find.text('Save changes'));
+    await tester.tap(find.text('保存'));
     await tester.pumpAndSettle();
 
     expect(repository.updatedUsername, 'renamed-user');
     expect(repository.updatedPassword, 'new-password');
-    expect(find.text('Profile updated successfully.'), findsOneWidget);
+    expect(find.text('个人资料已更新。'), findsOneWidget);
     expect(authNotifier.state.session?.username, 'renamed-user');
   });
 }

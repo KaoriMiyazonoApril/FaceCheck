@@ -8,7 +8,11 @@ spring:
   rabbitmq:
     listener:
       simple:
-        auto-startup: false
+        auto-startup: true
+  flyway:
+    locations: classpath:db/migration,classpath:db/local
+    placeholders:
+      seed_local_test_data_enabled: true
 
 logging:
   level:

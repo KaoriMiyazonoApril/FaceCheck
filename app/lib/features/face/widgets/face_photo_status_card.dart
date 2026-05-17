@@ -50,23 +50,33 @@ class FacePhotoStatusCard extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: <Widget>[
-                Chip(label: Text('State: ${photo.status}')),
-                Chip(label: Text('Detect: ${photo.detectStatus}')),
-                Chip(label: Text('Register: ${photo.registerStatus}')),
+                Chip(
+                  label: Text(
+                    '照片状态：${FacePhotoActions.photoStatusLabel(photo.status)}',
+                  ),
+                ),
+                Chip(
+                  label: Text(
+                    '检测状态：${FacePhotoActions.detectStatusLabel(photo.detectStatus)}',
+                  ),
+                ),
+                Chip(
+                  label: Text(
+                    '注册状态：${FacePhotoActions.registerStatusLabel(photo.registerStatus)}',
+                  ),
+                ),
               ],
             ),
-            if (photo.failureCode != null && photo.failureCode!.isNotEmpty) ...<
-              Widget
-            >[
+            if (photo.failureCode != null &&
+                photo.failureCode!.isNotEmpty) ...<Widget>[
               const SizedBox(height: 8),
-              Text('Failure code: ${photo.failureCode}'),
+              Text('失败代码：${photo.failureCode}'),
             ],
-            if (photo.previewUrl != null && photo.previewUrl!.isNotEmpty) ...<
-              Widget
-            >[
+            if (photo.previewUrl != null &&
+                photo.previewUrl!.isNotEmpty) ...<Widget>[
               const SizedBox(height: 8),
               Text(
-                'Preview ready',
+                '预览地址已生成',
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.primary,
                 ),
@@ -82,19 +92,19 @@ class FacePhotoStatusCard extends StatelessWidget {
                       ? null
                       : () => onReplace(PhotoCaptureSource.gallery),
                   icon: const Icon(Icons.photo_library_outlined),
-                  label: const Text('Replace from gallery'),
+                  label: const Text('从相册替换'),
                 ),
                 OutlinedButton.icon(
                   onPressed: isSubmitting
                       ? null
                       : () => onReplace(PhotoCaptureSource.camera),
                   icon: const Icon(Icons.photo_camera_outlined),
-                  label: const Text('Replace with camera'),
+                  label: const Text('重新拍照'),
                 ),
                 TextButton.icon(
                   onPressed: isSubmitting ? null : onDelete,
                   icon: const Icon(Icons.delete_outline),
-                  label: const Text('Delete'),
+                  label: const Text('删除照片'),
                 ),
               ],
             ),

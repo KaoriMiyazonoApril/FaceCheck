@@ -253,6 +253,22 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 
   /api/admin/users:
+    get:
+      tags: [AdminUsers]
+      summary: List managed users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Managed users returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponseUserProfileList'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
     post:
       tags: [AdminUsers]
       summary: Create a managed user
@@ -949,6 +965,25 @@ components:
           enum: [true]
         data:
           $ref: '#/components/schemas/UserProfile'
+        error:
+          nullable: true
+        traceId:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+    ApiResponseUserProfileList:
+      type: object
+      required: [success, data, timestamp]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserProfile'
         error:
           nullable: true
         traceId:

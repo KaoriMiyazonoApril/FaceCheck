@@ -8,6 +8,7 @@ import 'package:facecheck_app/features/face/face_photo_capture_service.dart';
 import 'package:facecheck_app/router/app_router.dart';
 import 'package:facecheck_app/services/api_client.dart';
 import 'package:facecheck_app/services/auth_interceptor.dart';
+import 'package:facecheck_app/shared/config/app_test_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -36,7 +37,7 @@ void main() {
         sessionName: 'Morning Roll Call',
         status: 'PROCESSING',
         resultCode: 'PROCESSING',
-        resultMessage: 'The check-in is still being processed.',
+        resultMessage: '签到仍在处理中。',
         nextPollAfterSeconds: 3,
       ),
       fetchResponses: <CheckinAttemptSummary>[
@@ -46,7 +47,7 @@ void main() {
           sessionName: 'Morning Roll Call',
           status: 'PROCESSING',
           resultCode: 'PROCESSING',
-          resultMessage: 'The check-in is still being processed.',
+          resultMessage: '签到仍在处理中。',
           nextPollAfterSeconds: 3,
         ),
         CheckinAttemptSummary(
@@ -55,7 +56,7 @@ void main() {
           sessionName: 'Morning Roll Call',
           status: 'SUCCESS',
           resultCode: 'SUCCESS',
-          resultMessage: 'Check-in completed successfully.',
+          resultMessage: '签到成功。',
           checkinTime: DateTime(2026, 5, 14, 8, 30),
           maskedUsername: 'u***r',
           similarity: 94.0,
@@ -81,7 +82,7 @@ void main() {
                 onPressed: () => onScan(
                   'facecheck://checkin/session-entry?qrToken=token-1',
                 ),
-                child: const Text('Emit QR scan'),
+                child: const Text('模拟扫码'),
               ),
             );
           },
@@ -89,44 +90,46 @@ void main() {
       ],
     );
 
-    expect(find.text('Scan the FaceCheck session QR code'), findsOneWidget);
+    expect(find.byKey(AppTestKeys.anonymousCheckinEntryPage), findsOneWidget);
+    expect(find.text('扫码签到'), findsOneWidget);
 
-    await tester.tap(find.text('Emit QR scan'));
+    await tester.tap(find.text('模拟扫码'));
     await tester.pumpAndSettle();
 
     expect(find.text('Morning Roll Call'), findsOneWidget);
-    expect(find.text('Continue to camera'), findsOneWidget);
+    expect(find.byKey(AppTestKeys.anonymousCheckinStartButton), findsOneWidget);
 
-    await tester.tap(find.text('Continue to camera'));
+    await tester.tap(find.byKey(AppTestKeys.anonymousCheckinStartButton));
     await tester.pumpAndSettle();
 
-    expect(find.text('Capture check-in photo'), findsOneWidget);
+    expect(find.text('拍摄签到照片'), findsOneWidget);
 
-    await tester.tap(find.text('Take photo'));
+    await tester.tap(find.text('拍照'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Preview: selfie.png'), findsOneWidget);
+    expect(find.text('预览：selfie.png'), findsOneWidget);
 
     await tester.scrollUntilVisible(
-      find.text('Submit anonymous check-in'),
+      find.text('提交匿名签到'),
       200,
     );
-    await tester.tap(find.text('Submit anonymous check-in'));
+    await tester.tap(find.text('提交匿名签到'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Still processing'), findsOneWidget);
-    expect(find.text('The check-in is still being processed.'), findsOneWidget);
+    expect(find.text('仍在处理中'), findsOneWidget);
+    expect(find.text('签到仍在处理中。'), findsOneWidget);
 
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();
 
-    expect(find.text('Check-in successful'), findsOneWidget);
-    expect(find.text('Matched user: u***r'), findsOneWidget);
+    expect(find.text('签到成功'), findsOneWidget);
+    expect(find.text('匹配用户：u***r'), findsOneWidget);
     expect(checkinRepository.submitCalls, 1);
     expect(checkinRepository.fetchCalls, 2);
   });
 
-  testWidgets('direct qrToken routes show refusal reasons for closed sessions', (
+  testWidgets('direct qrToken routes show refusal reasons for closed sessions',
+      (
     WidgetTester tester,
   ) async {
     final sessionRepository = _FakeSessionEntryRepository(
@@ -140,7 +143,7 @@ void main() {
           status: 'CLOSED',
           canCheckin: false,
           refusalCode: 'SESSION_CLOSED',
-          refusalReason: 'The session has already been closed.',
+          refusalReason: '该场次已经关闭。',
         ),
       },
     );
@@ -165,9 +168,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Closed Session'), findsOneWidget);
-    expect(find.text('Check-in unavailable'), findsOneWidget);
-    expect(find.text('The session has already been closed.'), findsWidgets);
-    expect(find.text('Continue to camera'), findsNothing);
+    expect(find.text('当前无法签到'), findsOneWidget);
+    expect(find.text('该场次已经关闭。'), findsWidgets);
+    expect(find.byKey(AppTestKeys.anonymousCheckinStartButton), findsNothing);
   });
 }
 

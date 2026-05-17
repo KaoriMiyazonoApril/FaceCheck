@@ -5,6 +5,7 @@ import 'package:facecheck_app/features/face/face_photo_page.dart';
 import 'package:facecheck_app/features/face/face_photo_repository.dart';
 import 'package:facecheck_app/services/api_client.dart';
 import 'package:facecheck_app/services/auth_interceptor.dart';
+import 'package:facecheck_app/shared/config/app_test_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,7 +20,7 @@ void main() {
           photoId: 'photo-1',
           status: 'FAILED',
           registerStatus: 'FAILED',
-          failureReason: 'Only JPEG, PNG, and WEBP files are supported.',
+          failureReason: '仅支持 JPEG、PNG 和 WEBP 图片。',
         ),
       ],
     );
@@ -38,11 +39,12 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(find.text('1 / 5 photos in use'), findsOneWidget);
-    expect(find.text('4 upload slots remaining'), findsOneWidget);
-    expect(find.text('Needs re-upload'), findsOneWidget);
+    expect(find.byKey(AppTestKeys.facePhotoPage), findsOneWidget);
+    expect(find.text('1 / 5 张已占用'), findsOneWidget);
+    expect(find.text('4 个可上传名额'), findsOneWidget);
+    expect(find.text('需要重新上传'), findsOneWidget);
     expect(
-      find.text('Only JPEG, PNG, and WEBP files are supported.'),
+      find.text('仅支持 JPEG、PNG 和 WEBP 图片。'),
       findsOneWidget,
     );
   });
@@ -70,10 +72,10 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Upload from gallery'));
+    await tester.tap(find.text('从相册上传'));
     await tester.pumpAndSettle();
 
-    expect(find.text('You can keep at most five face photos.'), findsOneWidget);
+    expect(find.text('最多只能保留五张人脸照片。'), findsOneWidget);
     expect(captureService.pickCalls, 0);
     expect(repository.uploadCalls, 0);
   });

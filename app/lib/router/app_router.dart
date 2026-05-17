@@ -1,3 +1,14 @@
+import 'package:facecheck_app/features/admin/admin_home_page.dart';
+import 'package:facecheck_app/features/admin/records/global_records_page.dart';
+import 'package:facecheck_app/features/admin/records/session_records_page.dart';
+import 'package:facecheck_app/features/admin/review/exception_review_page.dart';
+import 'package:facecheck_app/features/admin/sessions/admin_session_form_page.dart';
+import 'package:facecheck_app/features/admin/sessions/admin_session_list_page.dart';
+import 'package:facecheck_app/features/admin/sessions/session_qr_page.dart';
+import 'package:facecheck_app/features/admin/system/system_config_page.dart';
+import 'package:facecheck_app/features/admin/system/system_state_page.dart';
+import 'package:facecheck_app/features/admin/users/admin_user_form_page.dart';
+import 'package:facecheck_app/features/admin/users/admin_user_list_page.dart';
 import 'package:facecheck_app/features/auth/access_policy.dart';
 import 'package:facecheck_app/features/checkin/anonymous_access_policy.dart';
 import 'package:facecheck_app/features/checkin/checkin_capture_page.dart';
@@ -10,7 +21,6 @@ import 'package:facecheck_app/features/home/home_page.dart';
 import 'package:facecheck_app/features/profile/profile_page.dart';
 import 'package:facecheck_app/features/records/personal_records_page.dart';
 import 'package:facecheck_app/shared/models/auth_session.dart';
-import 'package:facecheck_app/shared/widgets/placeholder_page.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
@@ -106,11 +116,98 @@ class AppRouter {
         GoRoute(
           path: AppRoutePaths.admin,
           builder: (BuildContext context, GoRouterState state) {
-            return const PlaceholderPage(
-              title: 'Admin Workspace',
-              message:
-                  'Admin user, session, record, and review pages will be added in Stage 10.',
+            return const AdminHomePage();
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.adminUsers,
+          builder: (BuildContext context, GoRouterState state) {
+            return const AdminUserListPage();
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.adminUserCreate,
+          builder: (BuildContext context, GoRouterState state) {
+            return const AdminUserFormPage();
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.adminUserEditPattern,
+          builder: (BuildContext context, GoRouterState state) {
+            return AdminUserFormPage(
+              userId: state.pathParameters['userId'],
+              initialUsername: state.uri.queryParameters['username'],
+              initialRole: state.uri.queryParameters['role'],
+              initialStatus: state.uri.queryParameters['status'],
             );
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.adminSessions,
+          builder: (BuildContext context, GoRouterState state) {
+            return const AdminSessionListPage();
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.adminSessionCreate,
+          builder: (BuildContext context, GoRouterState state) {
+            return const AdminSessionFormPage();
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.adminSessionEditPattern,
+          builder: (BuildContext context, GoRouterState state) {
+            return AdminSessionFormPage(
+              sessionId: state.pathParameters['sessionId'],
+              initialName: state.uri.queryParameters['name'],
+              initialDescription: state.uri.queryParameters['description'],
+              initialStartTime: state.uri.queryParameters['startTime'],
+              initialEndTime: state.uri.queryParameters['endTime'],
+              initialLateAfterTime: state.uri.queryParameters['lateAfterTime'],
+              initialStatus: state.uri.queryParameters['status'],
+            );
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.adminSessionQrPattern,
+          builder: (BuildContext context, GoRouterState state) {
+            return SessionQrPage(
+              sessionId: state.pathParameters['sessionId'] ?? '',
+              sessionName: state.uri.queryParameters['sessionName'] ?? '',
+            );
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.adminSessionRecordsPattern,
+          builder: (BuildContext context, GoRouterState state) {
+            return SessionRecordsPage(
+              sessionId: state.pathParameters['sessionId'] ?? '',
+              sessionName: state.uri.queryParameters['sessionName'] ?? '',
+            );
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.adminRecords,
+          builder: (BuildContext context, GoRouterState state) {
+            return const GlobalRecordsPage();
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.adminReview,
+          builder: (BuildContext context, GoRouterState state) {
+            return const ExceptionReviewPage();
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.adminSystemState,
+          builder: (BuildContext context, GoRouterState state) {
+            return const SystemStatePage();
+          },
+        ),
+        GoRoute(
+          path: AppRoutePaths.adminSystemConfig,
+          builder: (BuildContext context, GoRouterState state) {
+            return const SystemConfigPage();
           },
         ),
       ],

@@ -1,4 +1,5 @@
 import 'package:facecheck_app/features/auth/access_policy.dart';
+import 'package:facecheck_app/shared/config/app_test_keys.dart';
 import 'package:facecheck_app/shared/providers/app_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,11 +31,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _submit() async {
-    final success =
-        await ref.read(authStateNotifierProvider.notifier).login(
-              username: _usernameController.text,
-              password: _passwordController.text,
-            );
+    final success = await ref.read(authStateNotifierProvider.notifier).login(
+          username: _usernameController.text,
+          password: _passwordController.text,
+        );
     if (success && mounted) {
       context.go(AppRoutePaths.home);
     }
@@ -53,6 +53,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
 
     return Scaffold(
+      key: AppTestKeys.loginPage,
       body: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 460),
@@ -66,28 +67,30 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     Text(
-                      'FaceCheck Sign in',
+                      '人脸签到系统',
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Use an ordinary-user or admin account. Anonymous QR check-in remains isolated from signed-in routes.',
+                      '登录后可使用个人资料、人脸照片和签到记录；匿名签到仅开放场次扫码与拍照提交。',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                     const SizedBox(height: 24),
                     TextField(
+                      key: AppTestKeys.loginUsernameInput,
                       controller: _usernameController,
                       decoration: const InputDecoration(
-                        labelText: 'Username',
+                        labelText: '用户名',
                         border: OutlineInputBorder(),
                       ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
+                      key: AppTestKeys.loginPasswordInput,
                       controller: _passwordController,
                       obscureText: true,
                       decoration: const InputDecoration(
-                        labelText: 'Password',
+                        labelText: '密码',
                         border: OutlineInputBorder(),
                       ),
                     ),
@@ -102,15 +105,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     ],
                     const SizedBox(height: 24),
                     FilledButton(
+                      key: AppTestKeys.loginSubmitButton,
                       onPressed: authState.isSubmitting ? null : _submit,
                       child: Text(
-                        authState.isSubmitting ? 'Signing in...' : 'Sign in',
+                        authState.isSubmitting ? '登录中...' : '登录',
                       ),
                     ),
                     const SizedBox(height: 12),
                     OutlinedButton(
-                      onPressed: () => context.go(AppRoutePaths.publicSessionEntry),
-                      child: const Text('Continue to public session entry'),
+                      key: AppTestKeys.anonymousCheckinEntryButton,
+                      onPressed: () =>
+                          context.go(AppRoutePaths.publicSessionEntry),
+                      child: const Text('进入匿名签到'),
                     ),
                   ],
                 ),

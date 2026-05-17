@@ -12,51 +12,26 @@
 ## Technical Context
 
 <!--
-  ACTION REQUIRED: Replace the content in this section with the concrete
-  project context. For this repository, plans are expected to describe a
-  Spring Boot monolith backend and a Flutter mobile app, plus the approved
-  infrastructure boundaries for PostgreSQL, Redis, RabbitMQ, and Huawei
-  Cloud FRS.
+  ACTION REQUIRED: Replace the content in this section with the technical details
+  for the project. The structure here is presented in advisory capacity to guide
+  the iteration process.
 -->
 
-**Backend Language/Version**: [e.g., Java 17 + Spring Boot 3.x or NEEDS CLARIFICATION]  
-**App Language/Version**: [e.g., Dart 3.x + Flutter stable or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [Spring Data JPA, PostgreSQL, Redis, RabbitMQ, JWT, Flyway, Docker Compose, Testcontainers, Huawei Cloud FRS, Huawei Cloud FRS SDK or REST client, Dio, Riverpod, go_router or NEEDS CLARIFICATION]  
-**Storage**: [PostgreSQL as source of truth; Redis only for cache/rate-limit/idempotency/session-assist; RabbitMQ only for async face enrollment, peak shaving, retries, DLQ; Huawei Cloud FRS only as managed face-recognition provider, not a business source of truth]  
-**Testing**: [Spring Boot unit/integration tests, PostgreSQL Testcontainers, provider/mock-provider tests, Flutter tests, Android emulator/device validation where applicable]  
-**Target Platform**: [Linux/Docker backend, Android primary, Windows desktop only for early UI/state/API debugging, iOS optional with separate validation]  
-**Project Type**: [Spring Boot monolith + Flutter mobile app]  
-**Performance Goals**: [e.g., peak check-in throughput, queue latency, response targets or NEEDS CLARIFICATION]  
-**Constraints**: [two-role system only; no microservice split; Flutter app must not call Huawei Cloud FRS directly; check-in upload may be unauthenticated but must remain rate-limited, anti-abuse, and face-verified]  
-**Scale/Scope**: [e.g., active users, image volume, peak check-ins, admin workload or NEEDS CLARIFICATION]
+**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
+**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
+**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
+**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
+**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
+**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]  
+**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
+**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
+**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- [ ] The feature stays inside the Spring Boot monolith and does not introduce a
-      new remote service split for auth, person, photo, face, check-in, or record logic.
-- [ ] Backend and app technologies remain within the constitution-approved stack,
-      or the plan explicitly includes the required constitution/spec/tasks amendments.
-- [ ] Huawei Cloud FRS access remains behind the backend boundary; the Flutter app
-      does not call FRS directly and business code depends on `FaceRecognitionProvider`
-      rather than vendor-specific APIs.
-- [ ] Role scope remains limited to ordinary user and admin, or the change is
-      explicitly framed as a constitution amendment.
-- [ ] PostgreSQL remains the sole business source of truth; Redis and RabbitMQ
-      usage is limited to their approved support roles, and external face identifiers
-      are treated only as references or audit data.
-- [ ] If the feature touches check-in or upload flows, the plan documents JWT
-      boundaries, rate limiting, anti-brush controls, idempotency, duplicate
-      prevention, face-recognition validation, and external-provider failure handling.
-- [ ] If the feature touches face upload or recognition flows, the plan documents
-      FRS provider configuration, queue boundaries, timeout/retry behavior, and
-      any manual-review path.
-- [ ] If the feature touches camera, image reading, file upload, permissions,
-      network access, or the photo check-in flow, the plan includes Android
-      emulator or real-device validation.
-- [ ] Core business changes include the required automated tests, including
-      PostgreSQL Testcontainers coverage where integration behavior changes.
+[Gates determined based on constitution file]
 
 ## Project Structure
 
@@ -73,41 +48,51 @@ specs/[###-feature]/
 ```
 
 ### Source Code (repository root)
-Plans SHOULD align to the backend/app split below unless the repository already
-uses an equivalent structure and the plan documents the mapping.
+<!--
+  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
+  for this feature. Delete unused options and expand the chosen structure with
+  real paths (e.g., apps/admin, packages/something). The delivered plan must
+  not include Option labels.
+-->
 
 ```text
-backend/
-├── src/main/java/.../
-│   ├── auth/
-│   ├── user/
-│   ├── person/
-│   ├── photo/
-│   ├── face/
-│   ├── checkin/
-│   ├── session/
-│   ├── record/
-│   ├── admin/
-│   ├── common/
-│   └── infrastructure/
-├── src/main/resources/db/migration/
-└── src/test/java/.../
+# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
+src/
+├── models/
+├── services/
+├── cli/
+└── lib/
 
-app/
-├── lib/
-│   ├── features/
-│   ├── router/
+tests/
+├── contract/
+├── integration/
+└── unit/
+
+# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
+backend/
+├── src/
+│   ├── models/
 │   ├── services/
-│   └── shared/
-├── test/
-├── integration_test/
-├── android/
-└── ios/
+│   └── api/
+└── tests/
+
+frontend/
+├── src/
+│   ├── components/
+│   ├── pages/
+│   └── services/
+└── tests/
+
+# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
+api/
+└── [same as backend above]
+
+ios/ or android/
+└── [platform-specific structure: feature modules, UI flows, platform tests]
 ```
 
-**Structure Decision**: [Document the real backend/app paths, where
-`FaceRecognitionProvider` and its Huawei Cloud FRS implementation live, and
-explain any deviation from the recommended module split.]
+**Structure Decision**: [Document the selected structure and reference the real
+directories captured above]
 
 ## Complexity Tracking
 

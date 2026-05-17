@@ -68,36 +68,18 @@
 ### Edge Cases
 
 <!--
-  ACTION REQUIRED: Replace the placeholders with the feature's real edge cases.
-  If the feature affects sign-in, upload, image handling, identity recognition,
-  admin actions, or managed external face-recognition dependencies, explicitly
-  cover abuse, retries, provider failures, and authorization failure modes.
+  ACTION REQUIRED: The content in this section represents placeholders.
+  Fill them out with the right edge cases.
 -->
 
-- What happens when the upload payload is oversized, invalid, duplicated, or unsupported?
-- How does the system handle face no-match, low-confidence match, or ambiguous identity?
-- What happens when a client retries the same check-in request multiple times?
-- How does the system behave when Redis or RabbitMQ is unavailable during a flow that depends on them?
-- How does the system behave when the managed face-recognition provider times out, rate-limits requests, or returns inconsistent data?
-- If the feature touches mobile capture or upload, what happens when permission is denied, the image cannot be read, or the network is interrupted?
-
-## Constitution Alignment *(mandatory)*
-
-- **Role Scope**: [State whether the feature affects ordinary users, admins, or both. No third role may be introduced without a constitution amendment.]
-- **Auth & Access**: [State which endpoints require JWT, which flows may be unauthenticated, and what anti-abuse controls apply.]
-- **Data & Infra Boundary**: [Describe PostgreSQL, Redis, RabbitMQ, file storage, and backend API boundaries touched by this feature.]
-- **Face Pipeline Impact**: [Describe how the feature affects image upload, detection, enrollment, retrieval, liveness, or identity recognition, or state that it does not.]
-- **External Face Provider**: [State whether Huawei Cloud FRS is involved, how `FaceRecognitionProvider` is used, and how provider failures are surfaced.]
-- **Validation Target**: [State required Android emulator/device validation and automated backend test coverage.]
+- What happens when [boundary condition]?
+- How does system handle [error scenario]?
 
 ## Requirements *(mandatory)*
 
 <!--
-  ACTION REQUIRED: Replace the placeholders with concrete requirements. When
-  relevant, requirements MUST capture role isolation, JWT boundaries, upload
-  restrictions, face pipeline behavior, managed face-provider behavior, rate
-  limiting, idempotency, duplicate prevention, auditing, queue or cache usage,
-  and external reference boundaries.
+  ACTION REQUIRED: The content in this section represents placeholders.
+  Fill them out with the right functional requirements.
 -->
 
 ### Functional Requirements
@@ -135,12 +117,12 @@
 ## Assumptions
 
 <!--
-  ACTION REQUIRED: Replace these with project-specific assumptions. Assumptions
-  MUST NOT be used to bypass constitution rules on roles, data boundaries,
-  security, or required validation.
+  ACTION REQUIRED: The content in this section represents placeholders.
+  Fill them out with the right assumptions based on reasonable defaults
+  chosen when the feature description did not specify certain details.
 -->
 
-- [Assumption about affected roles, e.g., "Only ordinary users and admins participate in this flow"]
-- [Assumption about scope boundaries, e.g., "No new role or remote microservice is introduced and Flutter does not call Huawei Cloud FRS directly"]
-- [Assumption about data/environment, e.g., "PostgreSQL remains the business source of truth, Redis/RabbitMQ stay in support roles, and any external face provider is only an AI capability dependency"]
-- [Assumption about validation, e.g., "Android emulator or real-device validation is available for camera or upload flows"]
+- [Assumption about target users, e.g., "Users have stable internet connectivity"]
+- [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
+- [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
+- [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]

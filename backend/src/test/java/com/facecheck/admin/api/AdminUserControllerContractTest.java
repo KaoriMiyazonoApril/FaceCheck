@@ -2,6 +2,7 @@ package com.facecheck.admin.api;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -21,10 +22,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(AdminUserController.class)
 @AutoConfigureMockMvc(addFilters = false)
+@ActiveProfiles("test")
 @Import(GlobalExceptionHandler.class)
 class AdminUserControllerContractTest {
 
@@ -36,6 +39,25 @@ class AdminUserControllerContractTest {
 
     @MockBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Test
+    void shouldListManagedUsersWithUsernameOnlyContract() throws Exception {
+        UUID firstUserId = UUID.randomUUID();
+        UUID secondUserId = UUID.randomUUID();
+        given(adminUserService.listUsers())
+                .willReturn(java.util.List.of(
+                        new UserProfileResponse(firstUserId, "managed-admin", UserRole.ADMIN, UserStatus.ACTIVE),
+                        new UserProfileResponse(secondUserId, "managed-user", UserRole.USER, UserStatus.DISABLED)
+                ));
+
+        mockMvc.perform(get("/api/admin/users"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].userId").value(firstUserId.toString()))
+                .andExpect(jsonPath("$.data[0].username").value("managed-admin"))
+                .andExpect(jsonPath("$.data[0].phone").doesNotExist())
+                .andExpect(jsonPath("$.data[0].email").doesNotExist())
+                .andExpect(jsonPath("$.data[1].status").value("DISABLED"));
+    }
 
     @Test
     void shouldCreateUserWithUsernameOnlyContract() throws Exception {

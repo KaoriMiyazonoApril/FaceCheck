@@ -16,9 +16,9 @@ enum AppRole {
   String get label {
     switch (this) {
       case AppRole.admin:
-        return 'Administrator';
+        return '管理员';
       case AppRole.user:
-        return 'User';
+        return '用户';
     }
   }
 }

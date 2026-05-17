@@ -6,6 +6,8 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+    placeholders:
+      seed_local_test_data_enabled: false
   docker:
     compose:
       enabled: false

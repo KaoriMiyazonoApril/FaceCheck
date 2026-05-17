@@ -37,7 +37,7 @@ class _CheckinResultPageState extends ConsumerState<CheckinResultPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Check-in result'),
+        title: const Text('签到结果'),
       ),
       body: state.isLoading && state.attempt == null
           ? const Center(child: CircularProgressIndicator())
@@ -52,7 +52,7 @@ class _CheckinResultPageState extends ConsumerState<CheckinResultPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            'Unable to load this attempt',
+                            '无法加载本次签到结果',
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
                           const SizedBox(height: 12),
@@ -64,12 +64,12 @@ class _CheckinResultPageState extends ConsumerState<CheckinResultPage> {
                             children: <Widget>[
                               FilledButton(
                                 onPressed: controller.refresh,
-                                child: const Text('Retry'),
+                                child: const Text('重试'),
                               ),
                               OutlinedButton(
                                 onPressed: () => context
                                     .go(AppRoutePaths.publicSessionEntry),
-                                child: const Text('Scan another QR'),
+                                child: const Text('重新扫码'),
                               ),
                             ],
                           ),
@@ -138,22 +138,23 @@ class _ResultSummaryCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 20),
-            Text('Session: ${attempt.sessionName}'),
-            Text('Attempt: ${attempt.attemptId}'),
-            Text('Status: ${attempt.status}'),
-            Text('Result code: ${attempt.resultCode}'),
+            Text('场次：${attempt.sessionName}'),
+            Text('尝试编号：${attempt.attemptId}'),
+            Text(
+                '处理状态：${CheckinResultPresentation.statusLabel(attempt.status)}'),
+            Text('结果：${CheckinResultPresentation.resultCodeLabel(attempt)}'),
             if (attempt.checkinTime != null)
-              Text('Check-in time: ${attempt.checkinTime}'),
+              Text('签到时间：${_formatDateTime(attempt.checkinTime!)}'),
             if (attempt.maskedUsername != null &&
                 attempt.maskedUsername!.isNotEmpty)
-              Text('Matched user: ${attempt.maskedUsername}'),
+              Text('匹配用户：${attempt.maskedUsername}'),
             if (attempt.similarity != null)
               Text(
-                'Similarity: ${attempt.similarity!.toStringAsFixed(1)}%',
+                '相似度：${attempt.similarity!.toStringAsFixed(1)}%',
               ),
             const SizedBox(height: 16),
             const Text(
-              'This public route never unlocks personal profile, face library, or private attendance history.',
+              '匿名流程不会开放个人资料、人脸照片或个人签到记录。',
             ),
             const SizedBox(height: 16),
             Wrap(
@@ -163,12 +164,11 @@ class _ResultSummaryCard extends StatelessWidget {
                 if (attempt.isProcessing)
                   FilledButton(
                     onPressed: onRefresh,
-                    child: const Text('Refresh now'),
+                    child: const Text('立即刷新'),
                   ),
                 OutlinedButton(
-                  onPressed: () =>
-                      context.go(AppRoutePaths.publicSessionEntry),
-                  child: const Text('Scan another QR'),
+                  onPressed: () => context.go(AppRoutePaths.publicSessionEntry),
+                  child: const Text('重新扫码'),
                 ),
               ],
             ),
@@ -198,9 +198,9 @@ class CheckinResultPresentation {
     if (attempt.status == 'PROCESSING') {
       return CheckinResultPresentation(
         icon: Icons.hourglass_top,
-        title: 'Still processing',
+        title: '仍在处理中',
         message: attempt.resultMessage.isEmpty
-            ? 'Your anonymous check-in is still being processed.'
+            ? '你的匿名签到仍在处理中。'
             : attempt.resultMessage,
         tone: ResultTone.processing,
       );
@@ -209,9 +209,9 @@ class CheckinResultPresentation {
     if (attempt.status == 'SUCCESS') {
       return CheckinResultPresentation(
         icon: Icons.verified_outlined,
-        title: 'Check-in successful',
+        title: '签到成功',
         message: attempt.resultMessage.isEmpty
-            ? 'Your attendance was confirmed successfully.'
+            ? '已成功确认你的签到结果。'
             : attempt.resultMessage,
         tone: ResultTone.success,
       );
@@ -221,9 +221,9 @@ class CheckinResultPresentation {
         attempt.resultCode == 'DUPLICATE_CHECKIN') {
       return CheckinResultPresentation(
         icon: Icons.assignment_turned_in_outlined,
-        title: 'Already checked in',
+        title: '已完成签到',
         message: attempt.resultMessage.isEmpty
-            ? 'This user has already completed check-in for the current session.'
+            ? '当前用户已经完成本场次签到。'
             : attempt.resultMessage,
         tone: ResultTone.warning,
       );
@@ -241,52 +241,70 @@ class CheckinResultPresentation {
 
   static String _failureTitleFor(String resultCode) {
     return switch (resultCode) {
-      'SESSION_NOT_STARTED' => 'Session not started',
-      'EXPIRED_SESSION' => 'Session expired',
-      'SESSION_CLOSED' => 'Session closed',
-      'SESSION_CANCELED' => 'Session canceled',
-      'INVALID_QR_TOKEN' => 'QR code invalid',
-      'RATE_LIMITED' => 'Too many attempts',
-      'NO_FACE' => 'No face detected',
-      'MULTIPLE_FACES' => 'Multiple faces detected',
-      'LOW_CONFIDENCE' => 'Face match too weak',
-      'INVALID_IMAGE' => 'Image invalid',
-      'FRS_TIMEOUT' => 'Recognition timed out',
-      'FRS_RATE_LIMITED' => 'Recognition rate limited',
-      'FRS_ERROR' => 'Recognition unavailable',
-      _ => 'Check-in failed',
+      'SESSION_NOT_STARTED' => '场次未开始',
+      'EXPIRED_SESSION' => '场次已过期',
+      'SESSION_CLOSED' => '场次已关闭',
+      'SESSION_CANCELED' => '场次已取消',
+      'INVALID_QR_TOKEN' => '二维码无效',
+      'RATE_LIMITED' => '尝试过于频繁',
+      'NO_FACE' => '未检测到人脸',
+      'MULTIPLE_FACES' => '检测到多张人脸',
+      'LOW_CONFIDENCE' => '人脸匹配度过低',
+      'INVALID_IMAGE' => '图片无效',
+      'FRS_TIMEOUT' => '识别超时',
+      'FRS_RATE_LIMITED' => '识别限流',
+      'FRS_ERROR' => '识别服务不可用',
+      _ => '签到失败',
     };
   }
 
   static String _failureMessageFor(String resultCode) {
     return switch (resultCode) {
-      'SESSION_NOT_STARTED' =>
-        'The session has not opened yet. Wait for the start time and try again.',
-      'EXPIRED_SESSION' =>
-        'The session is already past its closing time.',
-      'SESSION_CLOSED' =>
-        'An administrator has already closed this session.',
-      'SESSION_CANCELED' =>
-        'This session was canceled and no longer accepts anonymous check-ins.',
-      'INVALID_QR_TOKEN' =>
-        'This QR code is invalid or expired. Ask for a fresh session QR code.',
-      'RATE_LIMITED' =>
-        'Too many anonymous attempts were sent. Wait a moment before retrying.',
-      'NO_FACE' =>
-        'No clear face was detected. Retake the photo with one person in frame.',
-      'MULTIPLE_FACES' =>
-        'More than one face was detected. Keep only one person in the frame.',
-      'LOW_CONFIDENCE' =>
-        'The face match confidence was too low. Try a clearer photo.',
-      'INVALID_IMAGE' =>
-        'The uploaded image could not be accepted. Try another photo.',
-      'FRS_TIMEOUT' =>
-        'The face-recognition request timed out. Retry this check-in once.',
-      'FRS_RATE_LIMITED' =>
-        'The recognition provider is throttling requests. Retry shortly.',
-      'FRS_ERROR' =>
-        'The recognition provider returned an error. Retry later.',
-      _ => 'The anonymous check-in could not be completed.',
+      'SESSION_NOT_STARTED' => '该场次尚未开放，请到开始时间后再试。',
+      'EXPIRED_SESSION' => '该场次已经超过结束时间。',
+      'SESSION_CLOSED' => '管理员已经关闭该场次。',
+      'SESSION_CANCELED' => '该场次已被取消，不再接受匿名签到。',
+      'INVALID_QR_TOKEN' => '二维码无效或已过期，请获取新的场次二维码。',
+      'RATE_LIMITED' => '匿名签到提交过于频繁，请稍后再试。',
+      'NO_FACE' => '未检测到清晰人脸，请重新拍摄并确保画面中只有一人。',
+      'MULTIPLE_FACES' => '检测到多张人脸，请确保画面中只有一人。',
+      'LOW_CONFIDENCE' => '人脸匹配度过低，请尝试更清晰的照片。',
+      'INVALID_IMAGE' => '上传的图片无法使用，请更换照片。',
+      'FRS_TIMEOUT' => '人脸识别请求超时，请重试一次。',
+      'FRS_RATE_LIMITED' => '识别服务正在限流，请稍后重试。',
+      'FRS_ERROR' => '识别服务返回错误，请稍后再试。',
+      _ => '匿名签到未能完成。',
     };
   }
+
+  static String statusLabel(String status) {
+    return switch (status.toUpperCase()) {
+      'PROCESSING' => '处理中',
+      'SUCCESS' => '成功',
+      'FAILED' => '失败',
+      'DUPLICATE_CHECKIN' => '重复签到',
+      _ => status,
+    };
+  }
+
+  static String resultCodeLabel(CheckinAttemptSummary attempt) {
+    if (attempt.status == 'PROCESSING') {
+      return '处理中';
+    }
+    if (attempt.status == 'SUCCESS') {
+      return '签到成功';
+    }
+    if (attempt.status == 'DUPLICATE_CHECKIN' ||
+        attempt.resultCode == 'DUPLICATE_CHECKIN') {
+      return '重复签到';
+    }
+    return _failureTitleFor(attempt.resultCode);
+  }
+}
+
+String _formatDateTime(DateTime value) {
+  final local = value.toLocal();
+  String two(int n) => n.toString().padLeft(2, '0');
+  return '${local.year}-${two(local.month)}-${two(local.day)} '
+      '${two(local.hour)}:${two(local.minute)}';
 }

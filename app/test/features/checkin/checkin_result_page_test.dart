@@ -7,7 +7,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('result page maps duplicate check-ins without exposing private data', (
+  testWidgets(
+      'result page maps duplicate check-ins without exposing private data', (
     WidgetTester tester,
   ) async {
     final repository = _StaticCheckinRepository(
@@ -23,13 +24,8 @@ void main() {
 
     await _pumpResultPage(tester, repository, 'attempt-1');
 
-    expect(find.text('Already checked in'), findsOneWidget);
-    expect(
-      find.text(
-        'This user has already completed check-in for the current session.',
-      ),
-      findsOneWidget,
-    );
+    expect(find.text('已完成签到'), findsOneWidget);
+    expect(find.text('当前用户已经完成本场次签到。'), findsOneWidget);
     expect(find.textContaining('userId'), findsNothing);
     expect(find.textContaining('username'), findsNothing);
   });
@@ -46,28 +42,26 @@ void main() {
       (
         attemptId: 'attempt-start',
         resultCode: 'SESSION_NOT_STARTED',
-        expectedTitle: 'Session not started',
-        expectedMessage:
-            'The session has not opened yet. Wait for the start time and try again.',
+        expectedTitle: '场次未开始',
+        expectedMessage: '该场次尚未开放，请到开始时间后再试。',
       ),
       (
         attemptId: 'attempt-expired',
         resultCode: 'EXPIRED_SESSION',
-        expectedTitle: 'Session expired',
-        expectedMessage: 'The session is already past its closing time.',
+        expectedTitle: '场次已过期',
+        expectedMessage: '该场次已经超过结束时间。',
       ),
       (
         attemptId: 'attempt-closed',
         resultCode: 'SESSION_CLOSED',
-        expectedTitle: 'Session closed',
-        expectedMessage: 'An administrator has already closed this session.',
+        expectedTitle: '场次已关闭',
+        expectedMessage: '管理员已经关闭该场次。',
       ),
       (
         attemptId: 'attempt-canceled',
         resultCode: 'SESSION_CANCELED',
-        expectedTitle: 'Session canceled',
-        expectedMessage:
-            'This session was canceled and no longer accepts anonymous check-ins.',
+        expectedTitle: '场次已取消',
+        expectedMessage: '该场次已被取消，不再接受匿名签到。',
       ),
     ];
 

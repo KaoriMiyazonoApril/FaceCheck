@@ -30,7 +30,7 @@ class QrScanController extends StateNotifier<QrScanState> {
     final trimmed = rawPayload.trim();
     if (trimmed.isEmpty) {
       state = state.copyWith(
-        errorMessage: 'Scan a FaceCheck QR code or paste a valid session token.',
+        errorMessage: '请扫描签到二维码，或粘贴有效的场次码。',
       );
       return null;
     }
@@ -39,8 +39,7 @@ class QrScanController extends StateNotifier<QrScanState> {
     if (parsedToken == null || parsedToken.isEmpty) {
       state = state.copyWith(
         lastPayload: trimmed,
-        errorMessage:
-            'This QR payload is invalid. Scan a FaceCheck session QR code instead.',
+        errorMessage: '二维码内容无效，请重新扫描签到二维码。',
       );
       return null;
     }

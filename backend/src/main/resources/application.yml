@@ -1,8 +1,6 @@
 spring:
   application:
     name: facecheck-backend
-  profiles:
-    default: local
   jackson:
     default-property-inclusion: non_null
   datasource:
@@ -21,6 +19,8 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+    placeholders:
+      seed_local_test_data_enabled: false
   data:
     redis:
       host: ${REDIS_HOST:localhost}
