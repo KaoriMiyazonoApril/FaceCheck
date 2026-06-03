@@ -9,6 +9,9 @@ spring:
     listener:
       simple:
         auto-startup: true
+  data:
+    redis:
+      port: 26379
   flyway:
     locations: classpath:db/migration,classpath:db/local
     placeholders:
