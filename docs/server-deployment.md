@@ -46,10 +46,21 @@ systemctl reload nginx
 
 - `FACECHECK_DEPLOY_HOST`
 - `FACECHECK_DEPLOY_PORT`
-- `FACECHECK_DEPLOY_USER`
 - `FACECHECK_DEPLOY_SSH_KEY`
+- `FACECHECK_DEPLOY_USER`
 
-推荐为 GitHub Actions 单独生成一把部署私钥，把公钥加入服务器用户的 `~/.ssh/authorized_keys`。
+当前工作流使用公网 IP + SSH 密码方式登录服务器。
+
+推荐配置：
+
+- `FACECHECK_DEPLOY_HOST=118.190.200.177`
+- `FACECHECK_DEPLOY_PORT=22`
+- `FACECHECK_DEPLOY_USER=root`
+- `FACECHECK_DEPLOY_SSH_KEY=<服务器公网 SSH 密码>`
+
+注意：为了兼容当前已有的 secret 名称，工作流里复用了 `FACECHECK_DEPLOY_SSH_KEY` 这个名字来存放“SSH 密码”，它当前并不是私钥内容。
+
+如果后续切回更安全的密钥部署方式，再把这个 secret 恢复成真实私钥，并把工作流调整回私钥登录。
 
 ## 5. 当前限制
 

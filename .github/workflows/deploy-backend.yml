@@ -32,30 +32,29 @@ jobs:
     needs: backend-verify
     runs-on: ubuntu-latest
     steps:
-      - name: Configure SSH key
+      - name: Install sshpass
         shell: bash
-        env:
-          FACECHECK_DEPLOY_SSH_KEY: ${{ secrets.FACECHECK_DEPLOY_SSH_KEY }}
-          FACECHECK_DEPLOY_HOST: ${{ secrets.FACECHECK_DEPLOY_HOST }}
-          FACECHECK_DEPLOY_PORT: ${{ secrets.FACECHECK_DEPLOY_PORT }}
         run: |
           set -euo pipefail
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "${FACECHECK_DEPLOY_SSH_KEY}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -p "${FACECHECK_DEPLOY_PORT:-22}" "${FACECHECK_DEPLOY_HOST}" >> ~/.ssh/known_hosts
+          sudo apt-get update
+          sudo apt-get install -y sshpass
 
       - name: Deploy commit on server
         shell: bash
         env:
           FACECHECK_DEPLOY_HOST: ${{ secrets.FACECHECK_DEPLOY_HOST }}
+          FACECHECK_DEPLOY_PASSWORD: ${{ secrets.FACECHECK_DEPLOY_SSH_KEY }}
           FACECHECK_DEPLOY_PORT: ${{ secrets.FACECHECK_DEPLOY_PORT }}
           FACECHECK_DEPLOY_USER: ${{ secrets.FACECHECK_DEPLOY_USER }}
           FACECHECK_REPOSITORY: ${{ github.repository }}
           FACECHECK_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
-          ssh -i ~/.ssh/id_ed25519 -p "${FACECHECK_DEPLOY_PORT:-22}" "${FACECHECK_DEPLOY_USER}@${FACECHECK_DEPLOY_HOST}" "
+          sshpass -p "${FACECHECK_DEPLOY_PASSWORD}" ssh \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -p "${FACECHECK_DEPLOY_PORT:-22}" \
+            "${FACECHECK_DEPLOY_USER}@${FACECHECK_DEPLOY_HOST}" "
             set -euo pipefail
             DEPLOY_DIR=/opt/facecheck
             REPO_URL=https://github.com/${FACECHECK_REPOSITORY}.git
