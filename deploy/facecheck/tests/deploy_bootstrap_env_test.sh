@@ -34,7 +34,7 @@ ENV_FILE="${TMP_DIR}/etc/facecheck.env"
 
 PATH="${FAKE_BIN}:${PATH}" \
 FACECHECK_ENV_FILE="${ENV_FILE}" \
-"${REPO_ROOT}/deploy/facecheck/scripts/deploy.sh"
+bash "${REPO_ROOT}/deploy/facecheck/scripts/deploy.sh"
 
 test -f "${ENV_FILE}"
 
