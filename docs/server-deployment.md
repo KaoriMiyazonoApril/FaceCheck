@@ -15,12 +15,16 @@
 mkdir -p /etc/facecheck /opt/facecheck
 ```
 
-2. 基于 `deploy/facecheck/facecheck.env.example` 创建生产环境文件：
+2. 可选：提前基于 `deploy/facecheck/facecheck.env.example` 创建生产环境文件：
 
 ```bash
 cp /opt/facecheck/deploy/facecheck/facecheck.env.example /etc/facecheck/facecheck.env
 chmod 600 /etc/facecheck/facecheck.env
 ```
+
+如果跳过这一步，首次执行 `deploy/facecheck/scripts/deploy.sh` 时会自动创建
+`/etc/facecheck/facecheck.env`，并为 PostgreSQL、Redis、RabbitMQ 与 JWT
+生成随机密钥。自动生成后仍建议人工打开该文件核对业务配置。
 
 3. 安装 nginx 站点：
 
@@ -66,3 +70,5 @@ systemctl reload nginx
 
 - 当前仓库里的华为云 FRS/OBS 生产适配器仍是占位或 mock 形态，所以 `HUAWEI_CLOUD_ENABLED` 暂时应保持 `false`。
 - 一旦未来补齐真实生产适配器，再把 `/etc/facecheck/facecheck.env` 里的华为云相关配置打开。
+- 首次自动生成 `/etc/facecheck/facecheck.env` 后，建议核对 `FACECHECK_BACKEND_HOST_PORT`、
+  `DB_URL`、`REDIS_HOST`、`RABBITMQ_HOST` 和 JWT/数据库密码是否符合当前服务器规划。

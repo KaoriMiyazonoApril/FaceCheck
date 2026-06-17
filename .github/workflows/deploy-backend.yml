@@ -28,6 +28,10 @@ jobs:
         working-directory: backend
         run: ./mvnw -q test
 
+      - name: Verify deploy bootstrap script
+        shell: bash
+        run: bash deploy/facecheck/tests/deploy_bootstrap_env_test.sh
+
   backend-deploy:
     needs: backend-verify
     runs-on: ubuntu-latest

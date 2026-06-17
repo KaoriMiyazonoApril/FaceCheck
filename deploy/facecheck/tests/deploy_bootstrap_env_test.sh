@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
+
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "${TMP_DIR}"' EXIT
+
+FAKE_BIN="${TMP_DIR}/bin"
+mkdir -p "${FAKE_BIN}" "${TMP_DIR}/etc"
+
+FAKE_DOCKER_LOG="${TMP_DIR}/docker.log"
+FAKE_CURL_LOG="${TMP_DIR}/curl.log"
+export FAKE_DOCKER_LOG
+export FAKE_CURL_LOG
+
+cat > "${FAKE_BIN}/docker" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+printf '%s\n' "$*" >> "${FAKE_DOCKER_LOG:?}"
+EOF
+
+cat > "${FAKE_BIN}/curl" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+printf '%s\n' "$*" >> "${FAKE_CURL_LOG:?}"
+EOF
+
+chmod +x "${FAKE_BIN}/docker" "${FAKE_BIN}/curl"
+
+ENV_FILE="${TMP_DIR}/etc/facecheck.env"
+
+PATH="${FAKE_BIN}:${PATH}" \
+FACECHECK_ENV_FILE="${ENV_FILE}" \
+"${REPO_ROOT}/deploy/facecheck/scripts/deploy.sh"
+
+test -f "${ENV_FILE}"
+
+if grep -q 'replace-with-a-strong' "${ENV_FILE}"; then
+  echo "expected bootstrap to replace placeholder secrets in ${ENV_FILE}" >&2
+  exit 1
+fi
+
+if ! grep -q '^POSTGRES_PASSWORD=' "${ENV_FILE}"; then
+  echo "expected POSTGRES_PASSWORD in ${ENV_FILE}" >&2
+  exit 1
+fi
+
+if ! grep -q '^DB_PASSWORD=' "${ENV_FILE}"; then
+  echo "expected DB_PASSWORD in ${ENV_FILE}" >&2
+  exit 1
+fi
+
+if ! grep -q '^JWT_SECRET=' "${ENV_FILE}"; then
+  echo "expected JWT_SECRET in ${ENV_FILE}" >&2
+  exit 1
+fi
+
+if [[ "$(stat -c '%a' "${ENV_FILE}")" != "600" ]]; then
+  echo "expected ${ENV_FILE} to have 600 permissions" >&2
+  exit 1
+fi
+
+if ! grep -q 'compose --env-file' "${FAKE_DOCKER_LOG}"; then
+  echo "expected docker compose to be invoked" >&2
+  exit 1
+fi
+
+if ! grep -q 'http://127.0.0.1:18080/api/health' "${FAKE_CURL_LOG}"; then
+  echo "expected health check curl to be invoked" >&2
+  exit 1
+fi
