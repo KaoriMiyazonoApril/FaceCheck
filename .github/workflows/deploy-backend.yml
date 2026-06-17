@@ -36,6 +36,9 @@ jobs:
     needs: backend-verify
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Install sshpass
         shell: bash
         run: |
@@ -50,10 +53,25 @@ jobs:
           FACECHECK_DEPLOY_PASSWORD: ${{ secrets.FACECHECK_DEPLOY_SSH_KEY }}
           FACECHECK_DEPLOY_PORT: ${{ secrets.FACECHECK_DEPLOY_PORT }}
           FACECHECK_DEPLOY_USER: ${{ secrets.FACECHECK_DEPLOY_USER }}
-          FACECHECK_REPOSITORY: ${{ github.repository }}
-          FACECHECK_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
+          ARCHIVE_PATH=/tmp/facecheck-deploy.tgz
+          REMOTE_ARCHIVE_PATH=/tmp/facecheck-deploy.tgz
+
+          tar \
+            --exclude-vcs \
+            --exclude='.serena' \
+            --exclude='backend/target' \
+            --exclude='app/build' \
+            -czf "${ARCHIVE_PATH}" .
+
+          sshpass -p "${FACECHECK_DEPLOY_PASSWORD}" scp \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -P "${FACECHECK_DEPLOY_PORT:-22}" \
+            "${ARCHIVE_PATH}" \
+            "${FACECHECK_DEPLOY_USER}@${FACECHECK_DEPLOY_HOST}:${REMOTE_ARCHIVE_PATH}"
+
           sshpass -p "${FACECHECK_DEPLOY_PASSWORD}" ssh \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
@@ -61,14 +79,13 @@ jobs:
             "${FACECHECK_DEPLOY_USER}@${FACECHECK_DEPLOY_HOST}" "
             set -euo pipefail
             DEPLOY_DIR=/opt/facecheck
-            REPO_URL=https://github.com/${FACECHECK_REPOSITORY}.git
-            if [ ! -d \"\${DEPLOY_DIR}/.git\" ]; then
-              rm -rf \"\${DEPLOY_DIR}\"
-              git clone \"\${REPO_URL}\" \"\${DEPLOY_DIR}\"
-            fi
-            cd \"\${DEPLOY_DIR}\"
-            git fetch --prune origin
-            git checkout --force \"${FACECHECK_SHA}\"
-            chmod +x deploy/facecheck/scripts/deploy.sh
-            FACECHECK_ENV_FILE=/etc/facecheck/facecheck.env deploy/facecheck/scripts/deploy.sh
+            STAGE_DIR=/opt/facecheck-stage
+            rm -rf \"\${STAGE_DIR}\"
+            mkdir -p \"\${STAGE_DIR}\"
+            tar -xzf \"${REMOTE_ARCHIVE_PATH}\" -C \"\${STAGE_DIR}\"
+            rm -rf \"\${DEPLOY_DIR}\"
+            mv \"\${STAGE_DIR}\" \"\${DEPLOY_DIR}\"
+            rm -f \"${REMOTE_ARCHIVE_PATH}\"
+            chmod +x \"\${DEPLOY_DIR}/deploy/facecheck/scripts/deploy.sh\"
+            FACECHECK_ENV_FILE=/etc/facecheck/facecheck.env \"\${DEPLOY_DIR}/deploy/facecheck/scripts/deploy.sh\"
           "
