@@ -26,7 +26,7 @@ chmod 600 /etc/facecheck/facecheck.env
 `/etc/facecheck/facecheck.env`，并为 PostgreSQL、Redis、RabbitMQ 与 JWT
 生成随机密钥。自动生成后仍建议人工打开该文件核对业务配置。
 
-3. 安装 nginx 站点：
+3. 可选：提前安装 nginx 站点：
 
 ```bash
 cp /opt/facecheck/deploy/facecheck/nginx/facecheck-campus.conf /etc/nginx/sites-available/facecheck-campus
@@ -34,6 +34,10 @@ ln -sf /etc/nginx/sites-available/facecheck-campus /etc/nginx/sites-enabled/face
 nginx -t
 systemctl reload nginx
 ```
+
+如果跳过这一步，GitHub Actions 部署阶段会在服务器上自动安装 `nginx`、
+同步 `deploy/facecheck/nginx/facecheck-campus.conf`，并执行 `enable --now`
+与 `reload`。
 
 ## 3. 校园网白名单
 
