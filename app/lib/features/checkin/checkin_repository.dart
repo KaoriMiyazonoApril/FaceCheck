@@ -17,7 +17,6 @@ class CheckinAttemptSummary {
     required this.resultMessage,
     this.checkinTime,
     this.maskedUsername,
-    this.similarity,
     this.nextPollAfterSeconds,
   });
 
@@ -29,7 +28,6 @@ class CheckinAttemptSummary {
   final String resultMessage;
   final DateTime? checkinTime;
   final String? maskedUsername;
-  final double? similarity;
   final int? nextPollAfterSeconds;
 
   bool get isProcessing => status == 'PROCESSING';
@@ -47,7 +45,6 @@ class CheckinAttemptSummary {
       checkinTime: DateTime.tryParse(payload['checkinTime']?.toString() ?? '')
           ?.toLocal(),
       maskedUsername: payload['maskedUsername']?.toString(),
-      similarity: (payload['similarity'] as num?)?.toDouble(),
       nextPollAfterSeconds: (payload['nextPollAfterSeconds'] as num?)?.toInt(),
     );
   }
@@ -85,9 +82,15 @@ class CheckinRepository {
     );
   }
 
-  Future<CheckinAttemptSummary> fetchAttempt(String attemptId) {
+  Future<CheckinAttemptSummary> fetchAttempt({
+    required String attemptId,
+    required String qrToken,
+  }) {
     return _apiClient.getEnvelope<CheckinAttemptSummary>(
       '/api/public/checkin/attempts/$attemptId',
+      queryParameters: <String, dynamic>{
+        'qrToken': qrToken,
+      },
       decoder: CheckinAttemptSummary.fromJson,
     );
   }

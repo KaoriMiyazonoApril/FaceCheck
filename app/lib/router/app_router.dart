@@ -92,6 +92,7 @@ class AppRouter {
           builder: (BuildContext context, GoRouterState state) {
             return CheckinResultPage(
               attemptId: state.uri.queryParameters['attemptId'] ?? '',
+              qrToken: state.uri.queryParameters['qrToken'] ?? '',
             );
           },
         ),

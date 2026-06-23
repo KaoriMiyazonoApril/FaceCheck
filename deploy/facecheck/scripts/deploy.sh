@@ -6,11 +6,26 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 COMPOSE_FILE="${REPO_ROOT}/deploy/facecheck/docker-compose.prod.yml"
 ENV_FILE="${FACECHECK_ENV_FILE:-/etc/facecheck/facecheck.env}"
-HOST_PORT="${FACECHECK_BACKEND_HOST_PORT:-18080}"
 HEALTH_PATH="${FACECHECK_BACKEND_HEALTH_PATH:-/api/health}"
 MAX_WAIT_SECONDS="${FACECHECK_DEPLOY_MAX_WAIT_SECONDS:-180}"
 SLEEP_SECONDS="${FACECHECK_DEPLOY_POLL_INTERVAL_SECONDS:-5}"
 ENV_TEMPLATE_FILE="${REPO_ROOT}/deploy/facecheck/facecheck.env.example"
+
+env_file_value() {
+    local name="${1:?env name is required}"
+    local default_value="${2:-}"
+    local value=""
+
+    if [[ -f "${ENV_FILE}" ]]; then
+        value="$(grep -E "^${name}=" "${ENV_FILE}" | tail -n 1 | cut -d= -f2- || true)"
+    fi
+
+    if [[ -n "${value}" ]]; then
+        printf '%s' "${value}"
+    else
+        printf '%s' "${default_value}"
+    fi
+}
 
 generate_secret() {
     local length="${1:?secret length is required}"
@@ -66,6 +81,8 @@ bootstrap_env_file() {
 }
 
 bootstrap_env_file
+
+HOST_PORT="$(env_file_value FACECHECK_BACKEND_HOST_PORT "${FACECHECK_BACKEND_HOST_PORT:-18080}")"
 
 docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}" up -d --build --remove-orphans
 docker compose --env-file "${ENV_FILE}" -f "${COMPOSE_FILE}" ps

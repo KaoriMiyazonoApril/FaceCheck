@@ -88,6 +88,6 @@ jobs:
             rm -f \"${REMOTE_ARCHIVE_PATH}\"
             chmod +x \"\${DEPLOY_DIR}/deploy/facecheck/scripts/bootstrap_host.sh\"
             chmod +x \"\${DEPLOY_DIR}/deploy/facecheck/scripts/deploy.sh\"
-            \"\${DEPLOY_DIR}/deploy/facecheck/scripts/bootstrap_host.sh\"
+            FACECHECK_ENV_FILE=/etc/facecheck/facecheck.env \"\${DEPLOY_DIR}/deploy/facecheck/scripts/bootstrap_host.sh\"
             FACECHECK_ENV_FILE=/etc/facecheck/facecheck.env \"\${DEPLOY_DIR}/deploy/facecheck/scripts/deploy.sh\"
           "

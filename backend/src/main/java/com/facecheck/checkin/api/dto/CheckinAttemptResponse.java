@@ -13,7 +13,6 @@ public record CheckinAttemptResponse(
         String resultMessage,
         Instant checkinTime,
         String maskedUsername,
-        Double similarity,
         Integer nextPollAfterSeconds
 ) {
 }

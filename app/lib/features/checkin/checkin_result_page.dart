@@ -9,9 +9,11 @@ class CheckinResultPage extends ConsumerStatefulWidget {
   const CheckinResultPage({
     super.key,
     required this.attemptId,
+    required this.qrToken,
   });
 
   final String attemptId;
+  final String qrToken;
 
   @override
   ConsumerState<CheckinResultPage> createState() => _CheckinResultPageState();
@@ -23,16 +25,16 @@ class _CheckinResultPageState extends ConsumerState<CheckinResultPage> {
     super.initState();
     Future.microtask(
       () => ref
-          .read(checkinResultControllerProvider(widget.attemptId).notifier)
-          .start(attemptId: widget.attemptId),
+          .read(checkinResultControllerProvider(_lookup).notifier)
+          .start(attemptId: widget.attemptId, qrToken: widget.qrToken),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(checkinResultControllerProvider(widget.attemptId));
+    final state = ref.watch(checkinResultControllerProvider(_lookup));
     final controller = ref.read(
-      checkinResultControllerProvider(widget.attemptId).notifier,
+      checkinResultControllerProvider(_lookup).notifier,
     );
 
     return Scaffold(
@@ -86,6 +88,11 @@ class _CheckinResultPageState extends ConsumerState<CheckinResultPage> {
             ),
     );
   }
+
+  CheckinResultLookup get _lookup => CheckinResultLookup(
+        attemptId: widget.attemptId,
+        qrToken: widget.qrToken,
+      );
 }
 
 class _ResultSummaryCard extends StatelessWidget {
@@ -148,10 +155,6 @@ class _ResultSummaryCard extends StatelessWidget {
             if (attempt.maskedUsername != null &&
                 attempt.maskedUsername!.isNotEmpty)
               Text('匹配用户：${attempt.maskedUsername}'),
-            if (attempt.similarity != null)
-              Text(
-                '相似度：${attempt.similarity!.toStringAsFixed(1)}%',
-              ),
             const SizedBox(height: 16),
             const Text(
               '匿名流程不会开放个人资料、人脸照片或个人签到记录。',

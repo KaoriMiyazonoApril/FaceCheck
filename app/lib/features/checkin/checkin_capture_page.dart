@@ -144,7 +144,9 @@ class CheckinCapturePage extends ConsumerWidget {
     }
 
     final encodedAttemptId = Uri.encodeQueryComponent(result.attemptId);
-    context
-        .go('${AppRoutePaths.publicCheckinResult}?attemptId=$encodedAttemptId');
+    final encodedQrToken = Uri.encodeQueryComponent(qrToken);
+    context.go(
+      '${AppRoutePaths.publicCheckinResult}?attemptId=$encodedAttemptId&qrToken=$encodedQrToken',
+    );
   }
 }

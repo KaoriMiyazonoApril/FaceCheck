@@ -35,7 +35,6 @@ public class CheckinResultMapper {
                 resultMessage(attempt),
                 record == null ? null : record.getCheckinTime(),
                 maskedUsername(attempt.getMatchedUserId()),
-                attempt.getSimilarity(),
                 attempt.getStatus() == CheckinStatus.PROCESSING ? checkinProperties.getNextPollAfterSeconds() : null
         );
     }

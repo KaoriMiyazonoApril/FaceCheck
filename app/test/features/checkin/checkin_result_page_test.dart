@@ -26,6 +26,7 @@ void main() {
 
     expect(find.text('已完成签到'), findsOneWidget);
     expect(find.text('当前用户已经完成本场次签到。'), findsOneWidget);
+    expect(find.textContaining('相似度'), findsNothing);
     expect(find.textContaining('userId'), findsNothing);
     expect(find.textContaining('username'), findsNothing);
   });
@@ -99,7 +100,7 @@ Future<void> _pumpResultPage(
         checkinRepositoryProvider.overrideWithValue(repository),
       ],
       child: MaterialApp(
-        home: CheckinResultPage(attemptId: attemptId),
+        home: CheckinResultPage(attemptId: attemptId, qrToken: 'token-1'),
       ),
     ),
   );
@@ -115,7 +116,10 @@ class _StaticCheckinRepository extends CheckinRepository {
   final CheckinAttemptSummary attempt;
 
   @override
-  Future<CheckinAttemptSummary> fetchAttempt(String attemptId) async {
+  Future<CheckinAttemptSummary> fetchAttempt({
+    required String attemptId,
+    required String qrToken,
+  }) async {
     return attempt;
   }
 }

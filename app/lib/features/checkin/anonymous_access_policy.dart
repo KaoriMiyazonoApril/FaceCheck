@@ -16,7 +16,7 @@ class AnonymousAccessPolicy {
     }
 
     if (path == AppRoutePaths.publicCheckinResult &&
-        !_hasAll(uri, <String>['attemptId'])) {
+        !_hasAll(uri, <String>['attemptId', 'qrToken'])) {
       return AppRoutePaths.publicSessionEntry;
     }
 

@@ -44,7 +44,10 @@ public class PublicCheckinController {
     }
 
     @GetMapping("/attempts/{attemptId}")
-    public ApiResponse<CheckinAttemptResponse> getAttempt(@PathVariable UUID attemptId) {
-        return ApiResponse.success(checkinService.getAttempt(attemptId));
+    public ApiResponse<CheckinAttemptResponse> getAttempt(
+            @PathVariable UUID attemptId,
+            @RequestParam @NotBlank String qrToken
+    ) {
+        return ApiResponse.success(checkinService.getAttempt(qrToken, attemptId));
     }
 }

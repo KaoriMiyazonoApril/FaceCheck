@@ -72,3 +72,25 @@ if ! grep -q 'http://127.0.0.1:18080/api/health' "${FAKE_CURL_LOG}"; then
   echo "expected health check curl to be invoked" >&2
   exit 1
 fi
+
+CUSTOM_ENV_FILE="${TMP_DIR}/etc/custom-facecheck.env"
+cp "${REPO_ROOT}/deploy/facecheck/facecheck.env.example" "${CUSTOM_ENV_FILE}"
+sed -i \
+  -e 's|^FACECHECK_BACKEND_HOST_PORT=.*|FACECHECK_BACKEND_HOST_PORT=19090|' \
+  -e 's|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=test-postgres-password|' \
+  -e 's|^DB_PASSWORD=.*|DB_PASSWORD=test-postgres-password|' \
+  -e 's|^REDIS_PASSWORD=.*|REDIS_PASSWORD=test-redis-password|' \
+  -e 's|^RABBITMQ_PASSWORD=.*|RABBITMQ_PASSWORD=test-rabbitmq-password|' \
+  -e 's|^JWT_SECRET=.*|JWT_SECRET=test-jwt-secret-with-more-than-32-characters|' \
+  "${CUSTOM_ENV_FILE}"
+
+: > "${FAKE_CURL_LOG}"
+
+PATH="${FAKE_BIN}:${PATH}" \
+FACECHECK_ENV_FILE="${CUSTOM_ENV_FILE}" \
+bash "${REPO_ROOT}/deploy/facecheck/scripts/deploy.sh"
+
+if ! grep -q 'http://127.0.0.1:19090/api/health' "${FAKE_CURL_LOG}"; then
+  echo "expected deploy health check to honor FACECHECK_BACKEND_HOST_PORT from env file" >&2
+  exit 1
+fi

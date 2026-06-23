@@ -133,7 +133,7 @@ void main() {
       state: const AuthState(),
       session: null,
       initialLocation:
-          '${AppRoutePaths.publicCheckinResult}?attemptId=attempt-1',
+          '${AppRoutePaths.publicCheckinResult}?attemptId=attempt-1&qrToken=token-1',
       overrides: <Override>[
         checkinRepositoryProvider.overrideWithValue(
           _StaticCheckinRepository(
@@ -275,7 +275,10 @@ class _StaticCheckinRepository extends CheckinRepository {
   final CheckinAttemptSummary attempt;
 
   @override
-  Future<CheckinAttemptSummary> fetchAttempt(String attemptId) async {
+  Future<CheckinAttemptSummary> fetchAttempt({
+    required String attemptId,
+    required String qrToken,
+  }) async {
     return attempt;
   }
 }

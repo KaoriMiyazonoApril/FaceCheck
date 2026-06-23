@@ -115,18 +115,20 @@ class AnonymousCheckinSuccessIntegrationTest extends RedisRabbitContainerSupport
                 .andExpect(jsonPath("$.data.status").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.resultCode").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.maskedUsername").isString())
-                .andExpect(jsonPath("$.data.similarity").value(94.0))
+                .andExpect(jsonPath("$.data.similarity").doesNotExist())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
         UUID attemptId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(response, "$.data.attemptId"));
 
-        mockMvc.perform(get("/api/public/checkin/attempts/{attemptId}", attemptId))
+        mockMvc.perform(get("/api/public/checkin/attempts/{attemptId}", attemptId)
+                        .param("qrToken", session.getQrToken()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.attemptId").value(attemptId.toString()))
                 .andExpect(jsonPath("$.data.status").value("SUCCESS"))
-                .andExpect(jsonPath("$.data.resultCode").value("SUCCESS"));
+                .andExpect(jsonPath("$.data.resultCode").value("SUCCESS"))
+                .andExpect(jsonPath("$.data.similarity").doesNotExist());
 
         AttendanceCheckinAttempt attempt = attendanceCheckinAttemptRepository.findById(attemptId).orElseThrow();
         AttendanceRecord record = attendanceRecordRepository.findAll().getFirst();
@@ -138,6 +140,41 @@ class AnonymousCheckinSuccessIntegrationTest extends RedisRabbitContainerSupport
         assertThat(record.getSessionId()).isEqualTo(session.getId());
         assertThat(record.getUserId()).isEqualTo(matchedUser.getId());
         assertThat(attendanceRecordRepository.count()).isEqualTo(1);
+    }
+
+    @Test
+    void shouldRejectAttemptQueryWhenQrTokenBelongsToAnotherSession() throws Exception {
+        given(faceRecognitionProvider.detectFace(any()))
+                .willReturn(new FaceRecognitionProvider.DetectFaceResult(1, true, null, "detect-1"));
+        given(faceRecognitionProvider.searchFace(any(), anyInt()))
+                .willReturn(new FaceRecognitionProvider.SearchFaceResult(
+                        List.of(new FaceRecognitionProvider.SearchCandidate(
+                                "frs-face-1",
+                                94.0,
+                                Map.of("userId", matchedUser.getId().toString())
+                        )),
+                        "search-1"
+                ));
+        given(faceRecognitionProvider.compareFace(any(), eq("frs-face-1")))
+                .willReturn(new FaceRecognitionProvider.CompareFaceResult(true, 94.0, "compare-1"));
+
+        String response = mockMvc.perform(multipart("/api/public/checkin/attempts")
+                        .file(pngFile("success.png"))
+                        .param("qrToken", session.getQrToken())
+                        .param("idempotencyKey", "idem-success")
+                        .param("deviceId", "pixel-1"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+        UUID attemptId = UUID.fromString(com.jayway.jsonpath.JsonPath.read(response, "$.data.attemptId"));
+
+        AttendanceSession otherSession = savePublishedSession("qr-other", sessionOwner.getId());
+
+        mockMvc.perform(get("/api/public/checkin/attempts/{attemptId}", attemptId)
+                        .param("qrToken", otherSession.getQrToken()))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error.code").value("NOT_FOUND"));
     }
 
     private User saveUser(String username) {

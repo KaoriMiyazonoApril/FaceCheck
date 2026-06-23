@@ -59,7 +59,6 @@ void main() {
           resultMessage: '签到成功。',
           checkinTime: DateTime(2026, 5, 14, 8, 30),
           maskedUsername: 'u***r',
-          similarity: 94.0,
         ),
       ],
     );
@@ -231,7 +230,10 @@ class _FakeCheckinRepository extends CheckinRepository {
   }
 
   @override
-  Future<CheckinAttemptSummary> fetchAttempt(String attemptId) async {
+  Future<CheckinAttemptSummary> fetchAttempt({
+    required String attemptId,
+    required String qrToken,
+  }) async {
     fetchCalls += 1;
     if (_fetchResponses.isEmpty) {
       return submitResponse;

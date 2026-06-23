@@ -143,8 +143,12 @@ public class CheckinService {
     }
 
     @Transactional(readOnly = true)
-    public CheckinAttemptResponse getAttempt(UUID attemptId) {
+    public CheckinAttemptResponse getAttempt(String qrToken, UUID attemptId) {
+        AttendanceSession tokenSession = qrTokenService.requireByToken(qrToken);
         AttendanceCheckinAttempt attempt = checkinAttemptService.getAttempt(attemptId);
+        if (!tokenSession.getId().equals(attempt.getSessionId())) {
+            throw new BusinessException(ErrorCode.NOT_FOUND, "Check-in attempt does not exist");
+        }
         AttendanceSession session = attendanceSessionRepository.findById(attempt.getSessionId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "Attendance session does not exist"));
         return checkinResultMapper.toResponse(attempt, session, recordFor(attempt, null));

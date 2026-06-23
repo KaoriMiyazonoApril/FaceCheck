@@ -57,10 +57,9 @@ class PublicCheckinControllerContractTest {
                         "The check-in is still being processed.",
                         null,
                         null,
-                        null,
                         3
                 ));
-        given(checkinService.getAttempt(attemptId))
+        given(checkinService.getAttempt("token-1", attemptId))
                 .willReturn(new CheckinAttemptResponse(
                         attemptId,
                         sessionId,
@@ -70,7 +69,6 @@ class PublicCheckinControllerContractTest {
                         "Check-in completed successfully.",
                         Instant.parse("2026-05-10T08:30:00Z"),
                         "u***r",
-                        91.5,
                         null
                 ));
 
@@ -88,10 +86,12 @@ class PublicCheckinControllerContractTest {
                 .andExpect(jsonPath("$.data.resultCode").value("PROCESSING"))
                 .andExpect(jsonPath("$.data.nextPollAfterSeconds").value(3))
                 .andExpect(jsonPath("$.data.maskedUsername").doesNotExist())
+                .andExpect(jsonPath("$.data.similarity").doesNotExist())
                 .andExpect(jsonPath("$.data.userId").doesNotExist())
                 .andExpect(jsonPath("$.data.username").doesNotExist());
 
-        mockMvc.perform(get("/api/public/checkin/attempts/{attemptId}", attemptId))
+        mockMvc.perform(get("/api/public/checkin/attempts/{attemptId}", attemptId)
+                        .param("qrToken", "token-1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.attemptId").value(attemptId.toString()))
@@ -99,7 +99,7 @@ class PublicCheckinControllerContractTest {
                 .andExpect(jsonPath("$.data.resultCode").value("SUCCESS"))
                 .andExpect(jsonPath("$.data.checkinTime").value("2026-05-10T08:30:00Z"))
                 .andExpect(jsonPath("$.data.maskedUsername").value("u***r"))
-                .andExpect(jsonPath("$.data.similarity").value(91.5))
+                .andExpect(jsonPath("$.data.similarity").doesNotExist())
                 .andExpect(jsonPath("$.data.userId").doesNotExist())
                 .andExpect(jsonPath("$.data.username").doesNotExist());
     }
@@ -107,7 +107,7 @@ class PublicCheckinControllerContractTest {
     @Test
     void shouldRejectMissingMultipartFieldsAndUnknownAttempts() throws Exception {
         UUID attemptId = UUID.randomUUID();
-        given(checkinService.getAttempt(attemptId))
+        given(checkinService.getAttempt("token-1", attemptId))
                 .willThrow(new BusinessException(ErrorCode.NOT_FOUND, "Check-in attempt does not exist"));
 
         mockMvc.perform(multipart("/api/public/checkin/attempts")
@@ -116,8 +116,16 @@ class PublicCheckinControllerContractTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
 
-        mockMvc.perform(get("/api/public/checkin/attempts/{attemptId}", attemptId))
+        mockMvc.perform(get("/api/public/checkin/attempts/{attemptId}", attemptId)
+                        .param("qrToken", "token-1"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error.code").value("NOT_FOUND"));
+    }
+
+    @Test
+    void shouldRequireQrTokenWhenQueryingAnonymousAttempt() throws Exception {
+        mockMvc.perform(get("/api/public/checkin/attempts/{attemptId}", UUID.randomUUID()))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"));
     }
 }

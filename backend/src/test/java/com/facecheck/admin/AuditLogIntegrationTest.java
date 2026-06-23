@@ -137,6 +137,54 @@ class AuditLogIntegrationTest extends RedisRabbitContainerSupport {
     }
 
     @Test
+    void shouldPersistAuditRowsForAdminUserManagement() throws Exception {
+        String createResponse = mockMvc.perform(post("/api/admin/users")
+                        .header(HttpHeaders.AUTHORIZATION, bearer(adminUser))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "username":"audited-created-user",
+                                  "password":"password123",
+                                  "role":"USER"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String userId = com.jayway.jsonpath.JsonPath.read(createResponse, "$.data.userId");
+
+        mockMvc.perform(put("/api/admin/users/{userId}", userId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(adminUser))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "username":"audited-updated-user",
+                                  "password":"newPassword123",
+                                  "status":"ACTIVE"
+                                }
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/admin/users/{userId}/disable", userId)
+                        .header(HttpHeaders.AUTHORIZATION, bearer(adminUser)))
+                .andExpect(status().isOk());
+
+        assertThat(auditLogRepository.findAll().stream().map(log -> log.getAction()).toList())
+                .contains("ADMIN_USER_CREATE", "ADMIN_USER_UPDATE", "ADMIN_USER_DISABLE");
+        assertThat(auditLogRepository.findAll().stream()
+                        .filter(log -> "ADMIN_USER_UPDATE".equals(log.getAction()))
+                        .map(log -> log.getDetailJson())
+                        .findFirst())
+                .hasValueSatisfying(detailJson -> {
+                    assertThat(detailJson).contains("\"passwordChanged\"");
+                    assertThat(detailJson).contains("true");
+                    assertThat(detailJson).doesNotContain("newPassword123");
+                });
+    }
+
+    @Test
     void shouldPersistExternalServiceCallLogsDuringRecognition() throws Exception {
         given(faceRecognitionProvider.detectFace(any()))
                 .willReturn(new FaceRecognitionProvider.DetectFaceResult(1, true, null, "detect-audit"));

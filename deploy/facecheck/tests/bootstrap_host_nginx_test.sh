@@ -17,6 +17,9 @@ mkdir -p \
   "${FAKE_ROOT}/etc/nginx/sites-available" \
   "${FAKE_ROOT}/etc/nginx/sites-enabled"
 
+ENV_FILE="${TMP_DIR}/facecheck.env"
+printf '%s\n' 'FACECHECK_BACKEND_HOST_PORT=19090' > "${ENV_FILE}"
+
 export LOG_FILE
 
 cat > "${FAKE_BIN}/apt-get" <<'EOF'
@@ -42,12 +45,23 @@ EOF
 chmod +x "${FAKE_BIN}/apt-get" "${FAKE_BIN}/systemctl"
 
 PATH="${FAKE_BIN}:${PATH}" \
+FACECHECK_ENV_FILE="${ENV_FILE}" \
 FACECHECK_NGINX_AVAILABLE_DIR="${FAKE_ROOT}/etc/nginx/sites-available" \
 FACECHECK_NGINX_ENABLED_DIR="${FAKE_ROOT}/etc/nginx/sites-enabled" \
 bash "${REPO_ROOT}/deploy/facecheck/scripts/bootstrap_host.sh"
 
 test -f "${FAKE_ROOT}/etc/nginx/sites-available/facecheck-campus.conf"
 test -L "${FAKE_ROOT}/etc/nginx/sites-enabled/facecheck-campus.conf"
+
+if ! grep -q 'proxy_pass http://127.0.0.1:19090;' "${FAKE_ROOT}/etc/nginx/sites-available/facecheck-campus.conf"; then
+  echo "expected nginx proxy_pass to honor FACECHECK_BACKEND_HOST_PORT from env file" >&2
+  exit 1
+fi
+
+if ! grep -q '^apt-get update$' "${LOG_FILE}"; then
+  echo "expected bootstrap script to update apt indexes before installing nginx" >&2
+  exit 1
+fi
 
 if ! grep -q '^apt-get install -y nginx$' "${LOG_FILE}"; then
   echo "expected bootstrap script to install nginx when command is missing" >&2

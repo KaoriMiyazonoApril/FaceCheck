@@ -41,12 +41,15 @@ class CheckinResultController extends StateNotifier<CheckinResultState> {
   final CheckinRepository _repository;
   Timer? _pollTimer;
   String? _attemptId;
+  String? _qrToken;
 
   Future<void> start({
     required String attemptId,
+    required String qrToken,
     CheckinAttemptSummary? seedAttempt,
   }) async {
     _attemptId = attemptId;
+    _qrToken = qrToken;
     _pollTimer?.cancel();
 
     if (seedAttempt != null) {
@@ -66,7 +69,11 @@ class CheckinResultController extends StateNotifier<CheckinResultState> {
 
   Future<void> refresh() async {
     final attemptId = _attemptId;
-    if (attemptId == null || attemptId.isEmpty) {
+    final qrToken = _qrToken;
+    if (attemptId == null ||
+        attemptId.isEmpty ||
+        qrToken == null ||
+        qrToken.isEmpty) {
       return;
     }
 
@@ -76,7 +83,10 @@ class CheckinResultController extends StateNotifier<CheckinResultState> {
     );
 
     try {
-      final attempt = await _repository.fetchAttempt(attemptId);
+      final attempt = await _repository.fetchAttempt(
+        attemptId: attemptId,
+        qrToken: qrToken,
+      );
       state = state.copyWith(
         attempt: attempt,
         isLoading: false,
@@ -111,8 +121,29 @@ class CheckinResultController extends StateNotifier<CheckinResultState> {
 }
 
 final checkinResultControllerProvider = StateNotifierProvider.autoDispose
-    .family<CheckinResultController, CheckinResultState, String>(
-  (Ref ref, String attemptId) => CheckinResultController(
+    .family<CheckinResultController, CheckinResultState, CheckinResultLookup>(
+  (Ref ref, CheckinResultLookup lookup) => CheckinResultController(
     repository: ref.watch(checkinRepositoryProvider),
   ),
 );
+
+@immutable
+class CheckinResultLookup {
+  const CheckinResultLookup({
+    required this.attemptId,
+    required this.qrToken,
+  });
+
+  final String attemptId;
+  final String qrToken;
+
+  @override
+  bool operator ==(Object other) {
+    return other is CheckinResultLookup &&
+        other.attemptId == attemptId &&
+        other.qrToken == qrToken;
+  }
+
+  @override
+  int get hashCode => Object.hash(attemptId, qrToken);
+}
