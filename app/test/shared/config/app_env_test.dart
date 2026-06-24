@@ -4,14 +4,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('AppEnv.resolve', () {
-    test('uses emulator localhost bridge by default on Android', () {
+    test('uses public backend by default on Android', () {
       final env = AppEnv.resolve(
         isWeb: false,
         platform: TargetPlatform.android,
       );
 
-      expect(env.baseUrl, 'http://10.0.2.2:8080');
-      expect(env.localBackendHosts, contains('10.0.2.2'));
+      expect(env.baseUrl, 'http://115.120.241.220:8080');
+      expect(env.localBackendHosts, contains('115.120.241.220'));
     });
 
     test('uses localhost by default on web', () {

@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+const String _publicBackendBaseUrl = 'http://115.120.241.220:8080';
+
 const String _baseUrlOverride = String.fromEnvironment(
   'FACECHECK_BASE_URL',
   defaultValue: '',
@@ -54,13 +56,13 @@ class AppEnv {
     switch (platform) {
       case TargetPlatform.android:
         return const AppEnv(
-          baseUrl: 'http://10.0.2.2:8080',
-          localBackendHosts: <String>['10.0.2.2', '127.0.0.1', 'localhost'],
+          baseUrl: _publicBackendBaseUrl,
+          localBackendHosts: <String>['115.120.241.220'],
         );
       default:
         return const AppEnv(
-          baseUrl: 'http://127.0.0.1:8080',
-          localBackendHosts: <String>['127.0.0.1', 'localhost'],
+          baseUrl: _publicBackendBaseUrl,
+          localBackendHosts: <String>['115.120.241.220'],
         );
     }
   }
