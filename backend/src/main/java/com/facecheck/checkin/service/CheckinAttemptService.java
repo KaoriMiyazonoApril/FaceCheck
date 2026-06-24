@@ -11,7 +11,6 @@ import com.facecheck.storage.HuaweiObsStorageService;
 import com.facecheck.storage.ObjectKeyStrategy;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,32 +60,34 @@ public class CheckinAttemptService {
         HuaweiObsStorageService.StoredObject storedObject =
                 storageService.upload(objectKey, validatedImage.content(), validatedImage.contentType());
 
-        AttendanceCheckinAttempt attempt = new AttendanceCheckinAttempt();
-        attempt.setId(attemptId);
-        attempt.setSessionId(session.getId());
-        attempt.setObsBucket(storedObject.bucket());
-        attempt.setObsRegion(storedObject.region());
-        attempt.setObsObjectKey(storedObject.objectKey());
-        attempt.setContentType(storedObject.contentType());
-        attempt.setSizeBytes(storedObject.sizeBytes());
-        attempt.setSha256(validatedImage.sha256());
-        attempt.setStorageProvider(storedObject.storageProvider());
-        attempt.setStatus(CheckinStatus.PROCESSING);
-        attempt.setResultCode("PROCESSING");
-        attempt.setIdempotencyKey(idempotencyKey);
-        attempt.setClientIp(clientIp);
-        attempt.setDeviceId(deviceId);
+        int inserted = attendanceCheckinAttemptRepository.insertProcessingAttemptIfAbsent(
+                attemptId,
+                session.getId(),
+                storedObject.bucket(),
+                storedObject.region(),
+                storedObject.objectKey(),
+                storedObject.contentType(),
+                storedObject.sizeBytes(),
+                validatedImage.sha256(),
+                storedObject.storageProvider(),
+                CheckinStatus.PROCESSING.name(),
+                "PROCESSING",
+                idempotencyKey,
+                clientIp,
+                deviceId
+        );
 
-        try {
-            return new CreatedAttempt(attendanceCheckinAttemptRepository.saveAndFlush(attempt), true);
-        } catch (DataIntegrityViolationException exception) {
+        if (inserted == 0) {
             storageService.delete(objectKey);
             return new CreatedAttempt(
                     attendanceCheckinAttemptRepository.findBySessionIdAndIdempotencyKey(session.getId(), idempotencyKey)
-                            .orElseThrow(() -> exception),
+                            .orElseThrow(() -> new BusinessException(ErrorCode.INTERNAL_ERROR, "Check-in attempt already exists but cannot be loaded.")),
                     false
             );
         }
+
+        return new CreatedAttempt(attendanceCheckinAttemptRepository.findById(attemptId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.INTERNAL_ERROR, "Check-in attempt was not persisted.")), true);
     }
 
     @Transactional(readOnly = true)

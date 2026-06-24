@@ -7,7 +7,6 @@ import com.facecheck.checkin.repo.AttendanceRecordRepository;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,20 +37,29 @@ public class AttendanceRecordService {
             return new RecordOutcome(false, existing.get());
         }
 
-        AttendanceRecord record = new AttendanceRecord();
-        record.setSessionId(sessionId);
-        record.setUserId(userId);
-        record.setAttemptId(attemptId);
-        record.setCheckinTime(Instant.now());
-        record.setStatus(AttendanceRecordStatus.VALID);
-        record.setSimilarity(similarity);
-        record.setSource(source);
+        UUID recordId = UUID.randomUUID();
+        Instant checkinTime = Instant.now();
+        int inserted = attendanceRecordRepository.insertRecordIfAbsent(
+                recordId,
+                sessionId,
+                userId,
+                attemptId,
+                checkinTime,
+                AttendanceRecordStatus.VALID.name(),
+                similarity,
+                source.name()
+        );
 
-        try {
-            return new RecordOutcome(true, attendanceRecordRepository.saveAndFlush(record));
-        } catch (DataIntegrityViolationException exception) {
-            return new RecordOutcome(false, null);
+        if (inserted == 1) {
+            return new RecordOutcome(true, attendanceRecordRepository.findById(recordId).orElseThrow());
         }
+
+        return new RecordOutcome(
+                false,
+                attendanceRecordRepository.findBySessionIdAndUserId(sessionId, userId)
+                        .or(() -> attendanceRecordRepository.findByAttemptId(attemptId))
+                        .orElse(null)
+        );
     }
 
     @Transactional(readOnly = true)
