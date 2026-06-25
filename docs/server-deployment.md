@@ -61,7 +61,7 @@ systemctl reload nginx
 
 推荐配置：
 
-- `FACECHECK_DEPLOY_HOST=118.190.200.177`
+- `FACECHECK_DEPLOY_HOST=115.120.241.220`
 - `FACECHECK_DEPLOY_PORT=22`
 - `FACECHECK_DEPLOY_USER=root`
 - `FACECHECK_DEPLOY_SSH_KEY=<服务器公网 SSH 密码>`
