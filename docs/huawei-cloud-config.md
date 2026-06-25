@@ -31,9 +31,9 @@ OBS_ENABLED=true
 FRS_AK=<your-huawei-cloud-ak>
 FRS_SK=<your-huawei-cloud-sk>
 
-OBS_ENDPOINT=<your-obs-endpoint>
-OBS_REGION=<your-obs-region>
-OBS_BUCKET=<your-obs-bucket>
+OBS_ENDPOINT=https://obs.cn-east-3.myhuaweicloud.com
+OBS_REGION=cn-east-3
+OBS_BUCKET=yunjisuan-zyh
 ```
 
 只验证 OBS 时暂时不需要填写 `FRS_PROJECT_ID`、`FRS_REGION`、`FRS_ENDPOINT`、`FRS_FACE_SET_NAME`。
@@ -69,7 +69,7 @@ OBS_BUCKET=<your-obs-bucket>
 | `FRS_SK` | 开启 OBS 或 FRS 时必填 | 华为云访问密钥 SK；当前 OBS 也复用该字段 | 不写入文档或 git |
 | `OBS_ENDPOINT` | 开启 OBS 或 FRS 时必填 | OBS endpoint | `https://obs.cn-east-3.myhuaweicloud.com` |
 | `OBS_REGION` | 开启 OBS 或 FRS 时必填 | OBS bucket 所在 region | `cn-east-3` |
-| `OBS_BUCKET` | 开启 OBS 或 FRS 时必填 | 存放人脸照片和签到照片的 bucket 名称 | `facecheck-prod` |
+| `OBS_BUCKET` | 开启 OBS 或 FRS 时必填 | 存放人脸照片和签到照片的 bucket 名称 | `yunjisuan-zyh` |
 | `FRS_PROJECT_ID` | 仅开启 FRS 时必填 | 华为云项目 ID | `<project-id>` |
 | `FRS_REGION` | 仅开启 FRS 时必填 | FRS 服务所在 region | `cn-east-3` |
 | `FRS_ENDPOINT` | 仅开启 FRS 时必填 | FRS endpoint | `<frs-endpoint>` |
@@ -77,6 +77,16 @@ OBS_BUCKET=<your-obs-bucket>
 | `FRS_SIMILARITY_THRESHOLD` | 否 | 签到识别相似度阈值 | `85` |
 
 不要把真实 AK/SK、JWT_SECRET、数据库密码写进 git 跟踪文件，也不要直接发到聊天里。需要我帮你检查时，可以只发脱敏后的配置形状，例如 `FRS_AK=***abcd`、`OBS_BUCKET=facecheck-prod`。
+
+当前项目已创建的 OBS 桶：
+
+```text
+OBS_BUCKET=yunjisuan-zyh
+OBS_REGION=cn-east-3
+OBS_ENDPOINT=https://obs.cn-east-3.myhuaweicloud.com
+```
+
+仍需由有华为云权限的同学或服务器管理员在服务器本地 `/etc/facecheck/facecheck.env` 中填写真实 `FRS_AK` / `FRS_SK`。
 
 ## 3. 安全边界
 
