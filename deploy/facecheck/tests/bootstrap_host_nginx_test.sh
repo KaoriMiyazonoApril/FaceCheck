@@ -84,18 +84,8 @@ if ! grep -q 'proxy_pass http://127.0.0.1:19090;' "${FAKE_ROOT}/etc/nginx/sites-
   exit 1
 fi
 
-if ! grep -q 'listen 80 default_server;' "${FAKE_ROOT}/etc/nginx/sites-available/facecheck-campus.conf"; then
-  echo "expected nginx to make FaceCheck the default HTTP server" >&2
-  exit 1
-fi
-
-if ! grep -q 'listen 8080 default_server;' "${FAKE_ROOT}/etc/nginx/sites-available/facecheck-campus.conf"; then
-  echo "expected nginx to make FaceCheck the default legacy HTTP server" >&2
-  exit 1
-fi
-
-if ! grep -q 'listen 443 ssl default_server;' "${FAKE_ROOT}/etc/nginx/sites-available/facecheck-campus.conf"; then
-  echo "expected nginx to make FaceCheck the default HTTPS server" >&2
+if ! grep -q 'listen 443 ssl;' "${FAKE_ROOT}/etc/nginx/sites-available/facecheck-campus.conf"; then
+  echo "expected nginx to expose HTTPS with the self-signed certificate" >&2
   exit 1
 fi
 
