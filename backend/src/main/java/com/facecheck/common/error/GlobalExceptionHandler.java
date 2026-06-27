@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
@@ -45,6 +46,13 @@ public class GlobalExceptionHandler {
         };
 
         return build(ErrorCode.VALIDATION_ERROR, message);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMaxUploadSizeExceededException(
+            MaxUploadSizeExceededException exception
+    ) {
+        return build(ErrorCode.INVALID_IMAGE, "Image file exceeds the 10 MB limit.");
     }
 
     @ExceptionHandler(AccessDeniedException.class)

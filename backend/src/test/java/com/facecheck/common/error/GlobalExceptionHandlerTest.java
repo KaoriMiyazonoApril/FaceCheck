@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 class GlobalExceptionHandlerTest {
 
@@ -66,6 +67,18 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.timestamp").isNotEmpty());
     }
 
+    @Test
+    void shouldWrapMultipartSizeExceptionsAsInvalidImage() throws Exception {
+        mockMvc.perform(post("/test/upload-too-large"))
+                .andExpect(handler().handlerType(TestController.class))
+                .andExpect(handler().methodName("uploadTooLarge"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.error.code").value("INVALID_IMAGE"))
+                .andExpect(jsonPath("$.data").doesNotExist())
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
+    }
+
     @RestController
     static class TestController {
 
@@ -77,6 +90,11 @@ class GlobalExceptionHandlerTest {
         @PostMapping("/test/validation-error")
         String validationError(@Valid @RequestBody TestRequest request) {
             return request.name();
+        }
+
+        @PostMapping("/test/upload-too-large")
+        void uploadTooLarge() {
+            throw new MaxUploadSizeExceededException(10L * 1024L * 1024L);
         }
     }
 
