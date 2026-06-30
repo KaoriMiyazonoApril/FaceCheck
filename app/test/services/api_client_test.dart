@@ -46,6 +46,18 @@ void main() {
       expect(normalized.statusCode, 401);
       expect(normalized.message, 'Username or password is incorrect.');
     });
+
+    test('normalizes TLS certificate failures', () {
+      final normalized = ApiClient.normalizeException(
+        DioException(
+          requestOptions: RequestOptions(path: '/api/auth/login'),
+          type: DioExceptionType.badCertificate,
+        ),
+      );
+
+      expect(normalized.code, 'TLS_CERTIFICATE_ERROR');
+      expect(normalized.message, 'Unable to verify the backend certificate.');
+    });
   });
 
   group('AuthInterceptor', () {

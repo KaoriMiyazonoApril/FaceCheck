@@ -138,6 +138,12 @@ class ApiClient {
           message: 'Unable to reach the backend service.',
           statusCode: error.response?.statusCode,
         );
+      case DioExceptionType.badCertificate:
+        return BackendApiException(
+          code: 'TLS_CERTIFICATE_ERROR',
+          message: 'Unable to verify the backend certificate.',
+          statusCode: error.response?.statusCode,
+        );
       default:
         return BackendApiException(
           code: 'UNKNOWN_ERROR',
