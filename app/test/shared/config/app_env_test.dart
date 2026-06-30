@@ -10,8 +10,8 @@ void main() {
         platform: TargetPlatform.android,
       );
 
-      expect(env.baseUrl, 'https://115.120.241.220');
-      expect(env.localBackendHosts, contains('115.120.241.220'));
+      expect(env.baseUrl, 'https://115.120.124.70');
+      expect(env.localBackendHosts, contains('115.120.124.70'));
     });
 
     test('uses localhost by default on web', () {
