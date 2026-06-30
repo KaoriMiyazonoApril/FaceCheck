@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:facecheck_app/services/auth_interceptor.dart';
+import 'package:facecheck_app/services/backend_certificate_policy.dart';
 import 'package:facecheck_app/shared/models/backend_api_exception.dart';
 
 typedef JsonFactory<T> = T Function(Object? json);
@@ -18,7 +19,10 @@ class ApiClient {
               'Accept': 'application/json',
             },
           ),
-        )..interceptors.add(authInterceptor);
+        ) {
+    configureBackendCertificatePolicy(_dio, baseUrl);
+    _dio.interceptors.add(authInterceptor);
+  }
 
   final Dio _dio;
 
