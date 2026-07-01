@@ -62,7 +62,9 @@ class AnonymousCheckinController extends StateNotifier<AnonymousCheckinState> {
     } catch (error) {
       state = state.copyWith(
         isPicking: false,
-        errorMessage: error.toString(),
+        errorMessage: error is UnsupportedPhotoFormatException
+            ? error.toString()
+            : '无法读取所选照片，请重新选择。',
       );
     }
   }

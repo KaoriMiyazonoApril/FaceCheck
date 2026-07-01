@@ -1,5 +1,6 @@
 import 'package:facecheck_app/features/face/face_photo_capture_service.dart';
 import 'package:facecheck_app/features/face/face_photo_repository.dart';
+import 'package:facecheck_app/shared/models/backend_api_exception.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -72,7 +73,7 @@ class FacePhotoUploadController extends StateNotifier<FacePhotoUploadState> {
     } catch (error) {
       state = state.copyWith(
         isLoading: false,
-        errorMessage: error.toString(),
+        errorMessage: _readablePhotoError(error),
         clearSuccess: true,
       );
     }
@@ -108,7 +109,7 @@ class FacePhotoUploadController extends StateNotifier<FacePhotoUploadState> {
     } catch (error) {
       state = state.copyWith(
         isSubmitting: false,
-        errorMessage: error.toString(),
+        errorMessage: _readablePhotoError(error),
         clearSuccess: true,
       );
     }
@@ -126,7 +127,16 @@ class FacePhotoUploadController extends StateNotifier<FacePhotoUploadState> {
       return;
     }
 
-    final selectedPhoto = await _captureService.pickPhoto(source);
+    SelectedPhoto? selectedPhoto;
+    try {
+      selectedPhoto = await _captureService.pickPhoto(source);
+    } catch (error) {
+      state = state.copyWith(
+        errorMessage: _readablePhotoError(error),
+        clearSuccess: true,
+      );
+      return;
+    }
     if (selectedPhoto == null) {
       return;
     }
@@ -152,7 +162,7 @@ class FacePhotoUploadController extends StateNotifier<FacePhotoUploadState> {
     } catch (error) {
       state = state.copyWith(
         isSubmitting: false,
-        errorMessage: error.toString(),
+        errorMessage: _readablePhotoError(error),
         clearSuccess: true,
       );
     }
@@ -166,3 +176,16 @@ final facePhotoUploadControllerProvider =
     captureService: ref.watch(facePhotoCaptureServiceProvider),
   ),
 );
+
+String _readablePhotoError(Object error) {
+  if (error is UnsupportedPhotoFormatException) {
+    return error.toString();
+  }
+  if (error is BackendApiException) {
+    if (error.code == 'INVALID_IMAGE') {
+      return '图片格式或内容无效，请选择 JPEG、PNG 或 WEBP 图片。';
+    }
+    return error.message;
+  }
+  return '照片操作失败，请稍后重试。';
+}

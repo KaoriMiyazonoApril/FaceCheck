@@ -35,6 +35,7 @@ class AppTestKeys {
   static const Key adminSessionListPage = Key('admin_session_list_page');
   static const Key adminSessionFormPage = Key('admin_session_form_page');
   static const Key adminSessionQrPage = Key('admin_session_qr_page');
+  static const Key adminSessionQrCode = Key('admin_session_qr_code');
   static const Key adminSessionRecordsPage = Key('admin_session_records_page');
   static const Key adminGlobalRecordsPage = Key('admin_global_records_page');
   static const Key adminExceptionReviewPage = Key(

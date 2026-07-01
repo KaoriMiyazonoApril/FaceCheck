@@ -118,6 +118,7 @@ class _FakeFacePhotoCaptureService implements FacePhotoCaptureService {
     return SelectedPhoto(
       fileName: 'photo.png',
       bytes: Uint8List.fromList(<int>[1, 2, 3]),
+      contentType: 'image/png',
     );
   }
 }

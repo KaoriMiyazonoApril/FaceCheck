@@ -5,6 +5,7 @@ import 'package:facecheck_app/shared/config/app_test_keys.dart';
 import 'package:facecheck_app/shared/models/backend_api_exception.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class SessionQrPage extends ConsumerStatefulWidget {
   const SessionQrPage({
@@ -103,7 +104,7 @@ class _SessionQrPageState extends ConsumerState<SessionQrPage> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    '当前阶段展示二维码载荷和 token 文本；如需重新生成，可立即轮换旧入口。',
+                    '请使用 FaceCheck 扫描下方二维码进入该场次。重新生成后，旧二维码将失效。',
                   ),
                 ],
               ),
@@ -132,8 +133,18 @@ class _SessionQrPageState extends ConsumerState<SessionQrPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
+                    Center(
+                      child: Semantics(
+                        label: '场次签到二维码',
+                        child: SessionQrCode(
+                          key: AppTestKeys.adminSessionQrCode,
+                          data: _qrToken!.qrContent,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                     Text(
-                      '当前二维码载荷',
+                      '二维码详情（用于复制和排障）',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 12),
@@ -158,6 +169,25 @@ class _SessionQrPageState extends ConsumerState<SessionQrPage> {
           ],
         ],
       ),
+    );
+  }
+}
+
+class SessionQrCode extends StatelessWidget {
+  const SessionQrCode({
+    super.key,
+    required this.data,
+  });
+
+  final String data;
+
+  @override
+  Widget build(BuildContext context) {
+    return QrImageView(
+      data: data,
+      version: QrVersions.auto,
+      size: 260,
+      backgroundColor: Colors.white,
     );
   }
 }
