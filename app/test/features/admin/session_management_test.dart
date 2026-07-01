@@ -1,4 +1,5 @@
 import 'package:facecheck_app/features/admin/admin_repository.dart';
+import 'package:facecheck_app/features/admin/sessions/session_qr_page.dart';
 import 'package:facecheck_app/features/auth/access_policy.dart';
 import 'package:facecheck_app/router/app_router.dart';
 import 'package:facecheck_app/services/api_client.dart';
@@ -82,6 +83,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(AppTestKeys.adminSessionQrPage), findsOneWidget);
+    final initialQr = tester.widget<SessionQrCode>(
+      find.byKey(AppTestKeys.adminSessionQrCode),
+    );
+    expect(
+      initialQr.data,
+      'facecheck://checkin/session-entry?qrToken=token-v1',
+    );
     expect(find.textContaining('facecheck://checkin/session-entry'),
         findsOneWidget);
 
@@ -89,6 +97,13 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repository.resetQrSessionIds.single, 'session-1');
+    final rotatedQr = tester.widget<SessionQrCode>(
+      find.byKey(AppTestKeys.adminSessionQrCode),
+    );
+    expect(
+      rotatedQr.data,
+      'facecheck://checkin/session-entry?qrToken=token-v2',
+    );
     expect(find.textContaining('qrToken=token-v2'), findsOneWidget);
   });
 }

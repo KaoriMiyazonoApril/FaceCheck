@@ -278,6 +278,12 @@ description: "Task list for 管理员场次人脸签到系统 implementation"
 - [X] T106 Run Android acceptance for anonymous check-in and admin smoke flows in `app/integration_test/anonymous_checkin_android_test.dart` and `app/integration_test/admin_android_smoke_test.dart` (Depends on: T091, T099, T101; Accept: emulator or device evidence shows camera, scan, upload, network, and role-gated admin paths working end to end).
 - [X] T107 Record release-readiness notes and a small-scope real Huawei cloud manual validation checklist in `docs/release-readiness.md` (Depends on: T104, T105, T106; Accept: docs describe how to perform a small amount of post-development real FRS/OBS validation outside the automated and load-test paths).
 
+### Defect remediation (related to T079, T095, T105, and T106)
+
+- [X] T108 [P] Add regression tests for QR rendering/token rotation and byte-signature-based JPEG/PNG/WEBP upload normalization (Depends on: T079, T095; Accept: tests reject unsupported image bytes and prove that the rendered QR uses the backend `qrContent`).
+- [X] T109 Fix the admin QR page to render a scannable code and normalize selected image filename/MIME from its real bytes for both face-photo and anonymous check-in uploads (Depends on: T108; Accept: QR rotation redraws the code, supported gallery images upload with consistent metadata, and unsupported formats show a Chinese message before upload).
+- [X] T110 Run Flutter static analysis/tests and record Android manual-validation requirements for the two fixes (Depends on: T109; Accept: automated Flutter gates pass, with real-device gallery upload and cross-device QR scanning explicitly identified for manual validation).
+
 ---
 
 ## Dependencies & Execution Order

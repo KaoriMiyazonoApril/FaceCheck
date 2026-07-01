@@ -70,7 +70,7 @@ class CheckinRepository {
         'file': MultipartFile.fromBytes(
           photo.bytes,
           filename: photo.fileName,
-          contentType: _contentTypeFor(photo.fileName),
+          contentType: MediaType.parse(photo.contentType),
         ),
       },
     );
@@ -93,15 +93,6 @@ class CheckinRepository {
       },
       decoder: CheckinAttemptSummary.fromJson,
     );
-  }
-
-  MediaType _contentTypeFor(String fileName) {
-    final extension = fileName.split('.').last.toLowerCase();
-    return switch (extension) {
-      'jpg' || 'jpeg' => MediaType('image', 'jpeg'),
-      'webp' => MediaType('image', 'webp'),
-      _ => MediaType('image', 'png'),
-    };
   }
 }
 
